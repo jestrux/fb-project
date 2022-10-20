@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en" style="min-height: 100%; display: flex; flex-direction: column">
+	<head>
+		<meta charset="utf-8" />
+		<meta
+			name="viewport"
+			content="width=device-width, initial-scale=1, shrink-to-fit=no"
+		/>
+
+		<script src="//unpkg.com/alpinejs" defer></script>
+		<link rel="stylesheet" href="css/bootstrap.min.css" />
+		<title>Admin</title>
+	</head>
+	<body x-data="loginForm" style="direction: rtl; text-align: right">
+		<div class="container mt-4">
+			<form id="login-form" @submit="handleLogin($event)">
+				<div class="form-group">
+					<label for="username">Username</label>
+					<input
+						required
+						type="email"
+						class="form-control"
+						id="username"
+						aria-describedby="emailHelp"
+					/>
+					<small id="emailHelp" class="form-text text-muted"
+						>We'll never share your email with anyone else.</small
+					>
+				</div>
+				<div class="form-group">
+					<label for="password">Password</label>
+					<input
+						required
+						type="password"
+						class="form-control"
+						id="password"
+					/>
+				</div>
+				<button type="submit" class="btn btn-primary">Submit</button>
+			</form>
+		</div>
+		<script>
+			document.addEventListener("alpine:init", () => {
+				Alpine.data("loginForm", () => ({
+					saving: false,
+					handleLogin(e) {
+						e.preventDefault();
+						window.location.href = "dashboard.html";
+					},
+				}));
+			});
+
+			// let loginForm = $('#login-form');
+			// loginForm.on('submit', () => {
+			//     return false;
+			// });
+			// loginForm.on('submit', () => {
+			//     let data = {username: $('#username').val(),password: $('#password').val()};
+			//     $.ajax({
+			//         type: 'POST',
+			//         url: '/index.php',
+			//         data: data,
+			//         dataType: 'json',
+			//         success: function (res) {
+			//             if(res.result == 'success') {
+			//                 location.reload();
+			//             }
+			//         },
+			//         error: function (err) {
+			//             console.log(err);
+			//         }
+			//     })
+
+			// })
+		</script>
+	</body>
+</html>

