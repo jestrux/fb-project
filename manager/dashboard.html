@@ -64,7 +64,7 @@
 		<div class="mt-4">
 			<h3>Customer records</h3>
 			<svg
-				x-show="fetchingCustomers"
+				x-show="!users?.length && fetchingUsers"
 				id="loader"
 				width="50"
 				height="50"
@@ -334,7 +334,7 @@
 					db,
 				} = window.fireBaseStuff;
 
-				async function fetchUsers() {
+				async function userFetcher() {
 					let users = [];
 					const cachedUsers = localStorage.getItem("CACHED_USERS");
 
@@ -372,14 +372,17 @@
 				Alpine.data("adminDashboard", () => ({
 					showNewUserTable: false,
 					users: [],
-					fetchingCustomers: false,
-					async init() {
-						this.fetchingCustomers = true;
+					fetchingUsers: false,
+					init() {
+						this.fetchUsers();
+					},
+					async fetchUsers() {
+						this.fetchingUsers = true;
 						try {
-							this.users = await fetchUsers();
-							this.fetchingCustomers = false;
+							this.users = await userFetcher();
+							this.fetchingUsers = false;
 						} catch (error) {
-							this.fetchingCustomers = true;
+							this.fetchingUsers = true;
 							console.log("Error fetching users: ", error);
 						}
 					},
@@ -404,9 +407,10 @@
 								"Document written with ID: ",
 								docRef.id
 							);
+							localStorage.removeItem("CACHED_USERS");
+							await this.fetchUsers();
 							hideLoader();
 							form.reset();
-							localStorage.removeItem("CACHED_USERS");
 						} catch (e) {
 							console.error("Error adding document: ", e);
 							hideLoader();
@@ -434,9 +438,11 @@
 									break;
 							}
 
+							localStorage.removeItem("CACHED_USERS");
+							await this.fetchUsers();
+
 							console.log(`User ${action}: `, res);
 							hideLoader();
-							localStorage.removeItem("CACHED_USERS");
 						} catch (e) {
 							console.error(`Error ${action} user: `, e);
 							hideLoader();
