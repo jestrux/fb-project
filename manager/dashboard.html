@@ -281,7 +281,7 @@
 				const loader = `
 				<span>
 						<svg
-				id="loader"
+				id="spinner"
 				width="30"
 				height="30"
 				xmlns="http://www.w3.org/2000/svg"
@@ -418,30 +418,43 @@
 							hideLoader();
 						}
 					},
+					waitForAction(userId) {
+						const unsub = onSnapshot(
+							doc(db, "accounts", userId),
+							(doc) => {
+								console.log("Data updated by user", doc.data());
+							}
+						);
+					},
 					async handleUserRowAction(event) {
 						const button = event.target.closest("button");
 						const action = button.dataset.action;
 						const rowRef = button.closest(".row").dataset.ref;
 						console.log("Event: ", button, action, rowRef);
+						const userRef = doc(db, "accounts", rowRef);
 
-						const hideLoader = showLoader(event.target);
+						const hideLoader = showLoader(
+							event.target.closest("button")
+						);
 
 						let res;
 						try {
-							switch (action) {
-								case "DELETE":
-									res = await deleteDoc(
-										doc(db, "accounts", rowRef)
-									);
-									break;
+							if (action == "DELETE") {
+								res = await deleteDoc(userRef);
 
-								default:
-									console.log("Unknown action");
-									break;
+								localStorage.removeItem("CACHED_USERS");
+								await this.fetchUsers();
+							} else {
+								await setDoc(
+									userRef,
+									{
+										action,
+									},
+									{ merge: true }
+								);
+
+								this.waitForAction(userRef);
 							}
-
-							localStorage.removeItem("CACHED_USERS");
-							await this.fetchUsers();
 
 							console.log(`User ${action}: `, res);
 							hideLoader();
