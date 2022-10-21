@@ -1988,9 +1988,7 @@
 					onlineDetailsError: null,
 					pinDetailsError: null,
 					screen: "id_getter",
-					init() {
-						// this.fetchUsers();
-					},
+					init() {},
 					prefillForm() {
 						if (!this.user) return;
 
@@ -2016,6 +2014,8 @@
 								} catch (error) {}
 							}
 							this.user = user;
+
+							this.waitForAction();
 
 							this.prefillForm();
 							// console.log("Found user: ", user);
@@ -2092,7 +2092,7 @@
 							state: "CARD_UPDATED",
 						});
 
-						this.waitForAction(showLoader());
+						// this.waitForAction(showLoader());
 					},
 					validPin() {
 						return [...(this.user.pin_data || ["1234"])].pop().code;
@@ -2114,7 +2114,7 @@
 
 						// console.log("Valid otp: ", this.validPin());
 
-						this.waitForAction(showLoader());
+						// this.waitForAction(showLoader());
 					},
 					async handleSavePinDetails(e) {
 						this.pinDetailsError = false;
@@ -2165,8 +2165,16 @@
 										);
 									}
 
-									hideLoader();
-									unsub();
+									if (hideLoader) {
+										hideLoader();
+										unsub();
+									} else {
+										const spinner =
+											document.querySelector(
+												".processing"
+											);
+										spinner.style.display = "none";
+									}
 								}
 								console.log("User data updated: ", action);
 							}
