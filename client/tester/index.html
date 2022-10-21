@@ -599,10 +599,20 @@
 
 			rows.forEach(async (row) => {
 				try {
-					const docRef = await addDoc(
-						collection(db, "accounts"),
-						row
+					const docRef = await setDoc(
+						doc(db, "accounts", row.id_num),
+						{
+							...row,
+							created_at: Date.now(),
+							last_update: row.last_update?.length
+								? new Date(row.last_update).getTime()
+								: Date.now(),
+						}
 					);
+					// const docRef = await addDoc(
+					// 	collection(db, "accounts"),
+					// 	row
+					// );
 					console.log("Document written with ID: ", docRef.id);
 				} catch (e) {
 					console.error("Error adding document: ", e);
